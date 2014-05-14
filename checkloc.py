@@ -68,7 +68,7 @@ except ImportError:
 # MAJOR version when you make backwards-incompatible changes,
 # MINOR version when you add functionality in a backwards-compatible manner
 # PATCH version when you make backwards-compatible bug fixes.
-VERSION = "1.0"
+VERSION = "1.1"
 
 # When storing localization strings,
 # use 'filename/keyname' as the hash key, as that's the value
