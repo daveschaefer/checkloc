@@ -259,8 +259,7 @@ def validate_loc_files(loc_dir):
 
 	langs = {}
 	langfiles = {}
-	baseline = {}
-	baseline['files'] = []
+	baseline_files = []
 
 	print "Starting Localization tests..."
 
@@ -286,33 +285,33 @@ def validate_loc_files(loc_dir):
 		raise AssertionError("Base language folder '{0}' was not found in {1}".format(\
 			BASE_LOC, loc_dir))
 
-	baseline['name'] = BASE_LOC
-	baseline['files'].extend(langfiles[baseline['name']])
+	baseline_name = BASE_LOC
+	baseline_files.extend(langfiles[baseline_name])
 	del langs[BASE_LOC] # don't test the baseline localization against itself
 	
-	if (len(baseline['files']) < 1):
-		raise AssertionError("Did not find any files in '{0}'!".format(baseline['name']))
+	if (len(baseline_files) < 1):
+		raise AssertionError("Did not find any files in '{0}'!".format(baseline_name))
 
-	baseline['keys'] = _get_loc_keys(os.path.join(loc_dir, baseline['name']))
+	baseline_keys = _get_loc_keys(os.path.join(loc_dir, baseline_name))
 
 	if (any_errors):
 		return True # error message has already been printed above
 
 	print "{0} keys found in baseline '{1}'.".format(\
-		len(baseline['keys']), baseline['name'])
+		len(baseline_keys), baseline_name)
 
 	for lang in langs:
 		keys = _get_loc_keys(os.path.join(loc_dir, lang))
 
 		for key in keys:
-			if (key not in baseline['keys']):
+			if (key not in baseline_keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, lang, baseline['name']))
+					key, lang, baseline_name))
 
-		for key in baseline['keys']:
+		for key in baseline_keys:
 			if (key not in keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, baseline['name'], lang))
+					key, baseline_name, lang))
 
 	print "Done!"
 	return any_errors
