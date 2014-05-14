@@ -16,8 +16,10 @@
 
 """
 Validate Mozilla-style localization files to make sure all localizations
-have the same keys in the same places.
+have the same strings in the same places.
+"""
 
+"""
 Current test cases for each localization:
 	- Loc has no extra files
 	- Loc has no missing files
