@@ -35,6 +35,7 @@ Current test cases for each localization:
 		1. no % on a line
 		2. double %% to escape and print a regular %
 		3. %S or %n$S , where n is a number, for formatted string replacement.
+	- .properties values use the same count and type of string substitutions across languages
 	- No files contain the Byte Order Marker (BOM)
 
 Unimplemented:
@@ -119,10 +120,10 @@ def _extract_dtd_parse_error_info(err):
 		return "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
 			line, column, err.message, err.error_log)
 
-def _get_loc_keys(loc_dir, keys):
+def _get_loc_keys(loc_dir, keys, properties_file_subs):
 	"""
 	Read the localization string keys and values from all files in a directory
-	and return them as a dictionary.
+	and populate the appropriate dictionaries.
 
 	This function only reads data from Mozilla-style localization files:
 	XML DTD and .properties files.
@@ -174,14 +175,14 @@ def _get_loc_keys(loc_dir, keys):
 						file_path, _extract_dtd_parse_error_info(ex)))
 
 		elif (file_path.endswith('.properties')):
-			_parse_properties_file(file_path, keys)
+			_parse_properties_file(file_path, keys, properties_file_subs)
 		else:
 			# not neccesarily a failure - there may just be extra files lying around.
 			logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
 	return
-		
-def _parse_properties_file(file_path, keys):
+
+def _parse_properties_file(file_path, keys, subs):
 	"""
 	Extract localization string keys and values from a mozilla-style ".properties" file
 	https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files
@@ -197,6 +198,7 @@ def _parse_properties_file(file_path, keys):
 		data = re.sub(PROP_COMMENT, '', data)
 		data = re.split(PROP_SEP, data)
 		for line in data:
+			subs_list = [] # list of string substitutions
 			match = PROP_LINE.match(line)
 			if (match):
 				key = file_name + LSEP + match.group(1)
@@ -226,6 +228,7 @@ def _parse_properties_file(file_path, keys):
 						if (x + 1 < len(value)) and value[x+1] == '%':
 							x += 1 # double %% for escape sequence; print actual %
 						elif pmatch:
+							subs_list.append(pmatch.group(1).replace('$', ''))
 							# advance 1 char for the trailing S
 							# plus however many chars make up the numerical reference (if any)
 							x += 1
@@ -241,6 +244,8 @@ def _parse_properties_file(file_path, keys):
 
 					if valid:
 						keys[key] = value
+						subs_list.sort()
+						subs[key] = ''.join(subs_list)
 
 				else:
 					keys[key] = value
@@ -260,6 +265,7 @@ def validate_loc_files(loc_dir):
 	langfiles = {}
 	baseline_files = []
 	baseline_keys = {}
+	baseline_subs = {}
 
 	print "Starting Localization tests..."
 
@@ -292,7 +298,7 @@ def validate_loc_files(loc_dir):
 	if (len(baseline_files) < 1):
 		raise AssertionError("Did not find any files in '{0}'!".format(baseline_name))
 
-	_get_loc_keys(os.path.join(loc_dir, baseline_name), baseline_keys)
+	_get_loc_keys(os.path.join(loc_dir, baseline_name), baseline_keys, baseline_subs)
 
 	if (any_errors):
 		return True # error message has already been printed above
@@ -302,7 +308,8 @@ def validate_loc_files(loc_dir):
 
 	for lang in langs:
 		keys = {}
-		_get_loc_keys(os.path.join(loc_dir, lang), keys)
+		subs = {}
+		_get_loc_keys(os.path.join(loc_dir, lang), keys, subs)
 
 		for key in keys:
 			if (key not in baseline_keys):
@@ -313,6 +320,13 @@ def validate_loc_files(loc_dir):
 			if (key not in keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
 					key, baseline_name, lang))
+
+		# make sure .properties string substitutions match
+		# keys that don't exist in one loc will already have been caught above
+		for key in subs:
+			if subs[key] != baseline_subs[key]:
+				_log_error("String substitution does not match for '{0}' in '{1}' vs '{2}'.\n{1}:{3}\n{2}:{4}".format(\
+					key, lang, baseline_name, subs[key], baseline_subs[key]))
 
 	print "Done!"
 	return any_errors

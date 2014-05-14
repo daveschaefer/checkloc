@@ -23,6 +23,7 @@ Current test cases:
 		1. no % on a line
 		2. double %% to escape and print a regular %
 		3. %S or %n$S , where n is a number, for formatted string replacement.
+* .properties values use the same count and type of string substitutions across languages
 * No files contain the Byte Order Marker (BOM)
 
 
