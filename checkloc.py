@@ -174,14 +174,14 @@ def _get_loc_keys(loc_dir, keys):
 						file_path, _extract_dtd_parse_error_info(ex)))
 
 		elif (file_path.endswith('.properties')):
-			_parse_properties_file(keys, file_path)
+			_parse_properties_file(file_path, keys)
 		else:
 			# not neccesarily a failure - there may just be extra files lying around.
 			logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
 	return
 		
-def _parse_properties_file(keys, file_path):
+def _parse_properties_file(file_path, keys):
 	"""
 	Extract localization string keys and values from a mozilla-style ".properties" file
 	https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files
