@@ -119,7 +119,7 @@ def _extract_dtd_parse_error_info(err):
 		return "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
 			line, column, err.message, err.error_log)
 
-def _get_loc_keys(loc_dir):
+def _get_loc_keys(loc_dir, keys):
 	"""
 	Read the localization string keys and values from all files in a directory
 	and return them as a dictionary.
@@ -128,7 +128,6 @@ def _get_loc_keys(loc_dir):
 	XML DTD and .properties files.
 	"""
 	loc_files = []
-	keys = {}
 
 	# we assume that loc directries do not have sub-directories
 	for (root, dirs, files) in os.walk(loc_dir):
@@ -175,12 +174,12 @@ def _get_loc_keys(loc_dir):
 						file_path, _extract_dtd_parse_error_info(ex)))
 
 		elif (file_path.endswith('.properties')):
-			keys = _parse_properties_file(keys, file_path)
+			_parse_properties_file(keys, file_path)
 		else:
 			# not neccesarily a failure - there may just be extra files lying around.
 			logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
-	return keys
+	return
 		
 def _parse_properties_file(keys, file_path):
 	"""
@@ -249,7 +248,7 @@ def _parse_properties_file(keys, file_path):
 				_log_error("line '{0}' does not match any patterns for {1}".format(\
 					line, file_path))
 
-		return keys
+	return
 			
 
 def validate_loc_files(loc_dir):
@@ -260,6 +259,7 @@ def validate_loc_files(loc_dir):
 	langs = {}
 	langfiles = {}
 	baseline_files = []
+	baseline_keys = {}
 
 	print "Starting Localization tests..."
 
@@ -292,7 +292,7 @@ def validate_loc_files(loc_dir):
 	if (len(baseline_files) < 1):
 		raise AssertionError("Did not find any files in '{0}'!".format(baseline_name))
 
-	baseline_keys = _get_loc_keys(os.path.join(loc_dir, baseline_name))
+	_get_loc_keys(os.path.join(loc_dir, baseline_name), baseline_keys)
 
 	if (any_errors):
 		return True # error message has already been printed above
@@ -301,7 +301,8 @@ def validate_loc_files(loc_dir):
 		len(baseline_keys), baseline_name)
 
 	for lang in langs:
-		keys = _get_loc_keys(os.path.join(loc_dir, lang))
+		keys = {}
+		_get_loc_keys(os.path.join(loc_dir, lang), keys)
 
 		for key in keys:
 			if (key not in baseline_keys):
