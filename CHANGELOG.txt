@@ -11,6 +11,11 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+1.1.1
+-----
+* Fix path calculation to work for all types of path parameters
+
+
 1.1
 ---
 + Verify that string substitutions inside .properties files are the same across all languages

@@ -68,7 +68,7 @@ except ImportError:
 # MAJOR version when you make backwards-incompatible changes,
 # MINOR version when you add functionality in a backwards-compatible manner
 # PATCH version when you make backwards-compatible bug fixes.
-VERSION = "1.1"
+VERSION = "1.1.1"
 
 # When storing localization strings,
 # use 'filename/keyname' as the hash key, as that's the value
@@ -271,7 +271,7 @@ def validate_loc_files(loc_dir):
 
 	print "Starting Localization tests..."
 
-	loc_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), loc_dir)
+	loc_dir = os.path.abspath(loc_dir)
 	if not (os.path.exists(loc_dir)):
 		raise AssertionError("The localization directory {0} does not exist!".format(loc_dir))
 	logging.info("Loc directory {0} exists.".format(loc_dir))
