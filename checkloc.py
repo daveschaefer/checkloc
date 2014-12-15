@@ -15,8 +15,8 @@
 
 
 """
-Validate Mozilla-style localization files to make sure all localizations
-have the same strings in the same places.
+Validate Mozilla-style localization files (XUL and string bundle) 
+to make sure all localizations have the same strings in the same places.
 """
 
 import argparse
@@ -95,7 +95,7 @@ def _extract_dtd_parse_error_info(err):
 def _get_loc_keys(loc_dir, keys, properties_file_subs):
 	"""
 	Read the localization string keys and values from all files in a directory
-	and populate the appropriate dictionaries.
+	and populate the appropriate dictionaries. The 'keys' dictionary is modified in-place.
 
 	This function only reads data from Mozilla-style localization files:
 	XML DTD and .properties files.
@@ -157,6 +157,8 @@ def _get_loc_keys(loc_dir, keys, properties_file_subs):
 def _parse_properties_file(file_path, keys, subs):
 	"""
 	Extract localization string keys and values from a mozilla-style ".properties" file
+	and add the results to the 'keys' and 'subs' dictionaries.
+
 	https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files
 	"""
 	file_name = os.path.basename(file_path).replace(LSEP, '')
@@ -216,6 +218,8 @@ def _parse_properties_file(file_path, keys, subs):
 
 					if valid:
 						keys[key] = value
+						# different languages can of course use substitutions in different orders
+						# but sort so we can ensure the count and type are the same
 						subs_list.sort()
 						subs[key] = ''.join(subs_list)
 
@@ -229,7 +233,7 @@ def _parse_properties_file(file_path, keys, subs):
 			
 
 def validate_loc_files(loc_dir):
-	"""Validate localization contents."""
+	"""Validate localization contents inside the given base directory."""
 	global any_errors
 	any_errors = False
 
