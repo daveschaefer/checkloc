@@ -10,12 +10,19 @@ This script can be run before deploying your Firefox or SeaMonkey extension to t
 * [python](https://www.python.org/downloads/) 2.7 or higher
 * the [lxml python library](http://lxml.de/)
 
+### Installation
+
+```
+>git clone https://github.com/daveschaefer/checkloc.git
+>pip install lxml
+```
+
 
 ## Usage
 
-```> python checkloc.py path/to/your/plugin/chrome/locale```
+```>python checkloc/checkloc.py path/to/your/plugin/chrome/locale```
 
-Or run ```> python checkloc.py --help```
+Or run ```>python checkloc/checkloc.py --help```
 
 
 
@@ -28,7 +35,7 @@ Or run ```> python checkloc.py --help```
 5. No localization is missing keys
 6. No localization has duplicate keys defined in the same ```.properties``` file  
 	(the same key name defined in different files is okay - presumably they will be loaded and used in different string bundles)
-7. Key values are not empty
+7. No key is blank
 8. Key names contain no invalid characters, including ```"!@#$%^&*<>[](){} ?```
 9. DTD values contain no invalid characters, including ```"%<```
 10. DTD comments contain no double hyphens ```--```
