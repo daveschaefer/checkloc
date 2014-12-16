@@ -17,6 +17,7 @@
 Run unit tests for the checkloc module.
 """
 
+import argparse
 import logging
 import os
 import sys
@@ -41,5 +42,15 @@ class TestChecklocModule(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
+	parser = argparse.ArgumentParser(description=__doc__)
+	parser.add_argument('--verbose', '-v', default=False, action='store_true',
+			help="Verbose mode. Print more info while testing.")
+
+	args = parser.parse_args()
+
+	loglevel = logging.WARNING
+	if (args.verbose):
+		loglevel = logging.INFO
+
+	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
 	unittest.main()
