@@ -77,20 +77,21 @@ def _log_error(msg):
 	any_errors = True
 	logging.error(msg)
 
-def _extract_dtd_parse_error_info(err):
+def _extract_first_dtd_parse_error_info(err):
 	"""
 	Extract the line and column numbers from a DTDParseError,
 	so the user knows where to look for the problem
 	without having to understand the built-in error format.
+	If there is more than one error only the first is used.
 	Return a list of extracted data.
 	"""
 	# error_log lines are formatted like:
 	# <string>:10:17:FATAL:PARSER:ERR_VALUE_REQUIRED: Entity value required
-	line = str(err.error_log[-1]).strip()
+	line = str(err.error_log[0]).strip()
 	match = re.match(DTD_PARSE_ERROR, line)
 	if (match):
 		(string, line, column, errlevel, place, errname, message) = match.groups()
-		return [string, line, column, errlevel, place, errname, message]
+		return [string, line, column, errlevel, place, errname, message.strip()]
 
 def _get_loc_keys(loc_dir, keys, properties_file_subs):
 	"""
@@ -144,7 +145,7 @@ def _get_loc_keys(loc_dir, keys, properties_file_subs):
 
 				except (etree.DTDParseError) as ex:
 					(string, line, column, errlevel, place, errname, message) = \
-						_extract_dtd_parse_error_info(ex)
+						_extract_first_dtd_parse_error_info(ex)
 					error_message = "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
 						line, column, message, ex.error_log)
 					_log_error("Error: could not parse {0}: {1}".format(\
