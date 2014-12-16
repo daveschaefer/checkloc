@@ -21,6 +21,7 @@ to make sure all localizations have the same strings in the same places.
 
 import argparse
 import codecs
+import linecache
 import logging
 import os
 import re
@@ -144,11 +145,20 @@ def _get_loc_keys(loc_dir, keys, properties_file_subs):
 							keys[key] = entity.content
 
 				except (etree.DTDParseError) as ex:
-					(string, line, column, errlevel, place, errname, message) = \
-						_extract_first_dtd_parse_error_info(ex)
-					error_message = "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
-						line, column, message, ex.error_log)
-					_log_error("Error: could not parse {0}: {1}".format(\
+					(string, line, column, errlevel, place, errname, message) = _extract_first_dtd_parse_error_info(ex)
+
+					# get the error line so we can show the user where the problem may be
+					error_line = linecache.getline(file_path, int(line)).strip()
+					linecache.clearcache()
+					highlight_string = (" " * (int(column) - 1)) + "^"
+
+					error_message = "DTD syntax error starting at Line {0}, Col {1}: {2}\n{3}\n{4}\n{5}\n{6}\n{7}".format(\
+						line, column, message,
+						"Error line shown below, problem marked with ^:",
+						error_line, highlight_string,
+						"Full error details:",
+						ex.error_log)
+					_log_error("Could not parse {0}: {1}".format(\
 						file_path, error_message))
 
 		elif (file_path.endswith('.properties')):
