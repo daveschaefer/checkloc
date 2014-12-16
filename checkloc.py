@@ -82,6 +82,7 @@ def _extract_dtd_parse_error_info(err):
 	Extract the line and column numbers from a DTDParseError,
 	so the user knows where to look for the problem
 	without having to understand the built-in error format.
+	Return a list of extracted data.
 	"""
 	# error_log lines are formatted like:
 	# <string>:10:17:FATAL:PARSER:ERR_VALUE_REQUIRED: Entity value required
@@ -89,8 +90,7 @@ def _extract_dtd_parse_error_info(err):
 	match = re.match(DTD_PARSE_ERROR, line)
 	if (match):
 		(string, line, column, errlevel, place, errname, message) = match.groups()
-		return "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
-			line, column, err.message, err.error_log)
+		return [string, line, column, errlevel, place, errname, message]
 
 def _get_loc_keys(loc_dir, keys, properties_file_subs):
 	"""
@@ -143,8 +143,12 @@ def _get_loc_keys(loc_dir, keys, properties_file_subs):
 							keys[key] = entity.content
 
 				except (etree.DTDParseError) as ex:
+					(string, line, column, errlevel, place, errname, message) = \
+						_extract_dtd_parse_error_info(ex)
+					error_message = "Syntax error starting at Line {0}, Col {1}: {2}\n{3}".format(\
+						line, column, message, ex.error_log)
 					_log_error("Error: could not parse {0}: {1}".format(\
-						file_path, _extract_dtd_parse_error_info(ex)))
+						file_path, error_message))
 
 		elif (file_path.endswith('.properties')):
 			_parse_properties_file(file_path, keys, properties_file_subs)
