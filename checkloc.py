@@ -174,6 +174,7 @@ def _parse_properties_file(file_path, keys, subs):
 		for line in data:
 			if not line.strip():
 				continue # skip blank lines
+			logging.info(".prop line: '{0}'".format(line))
 			subs_list = [] # list of string substitutions
 			match = PROP_LINE.match(line)
 			if (match):
