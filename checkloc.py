@@ -202,11 +202,11 @@ def _parse_properties_file(file_path, keys, subs):
 						if (x + 1 < len(value)) and value[x+1] == '%':
 							x += 1 # double %% for escape sequence; print actual %
 						elif pmatch:
-							subs_list.append(pmatch.group(1).replace('$', ''))
 							# advance 1 char for the trailing S
 							# plus however many chars make up the numerical reference (if any)
 							x += 1
 							if pmatch.group(1):
+								subs_list.append(pmatch.group(1).replace('$', ''))
 								x += len(pmatch.group(1))
 						else:
 							_log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
