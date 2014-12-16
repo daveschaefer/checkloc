@@ -226,7 +226,7 @@ def _parse_properties_file(file_path, keys, subs):
 				else:
 					keys[key] = value
 			elif len(line) > 0: # not an empty string
-				_log_error("line '{0}' does not match any patterns for {1}".format(\
+				_log_error("line '{0}' does not match any .properties file patterns for {1}".format(\
 					line, file_path))
 
 	return
