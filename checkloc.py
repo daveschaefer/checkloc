@@ -236,7 +236,10 @@ def _parse_properties_file(file_path, keys, subs):
 			
 
 def validate_loc_files(loc_dir):
-	"""Validate localization contents inside the given base directory."""
+	"""
+	Validate localization contents inside the given base directory.
+	Return True if there were any errors and False otherwise.
+	"""
 	global any_errors
 	any_errors = False
 
