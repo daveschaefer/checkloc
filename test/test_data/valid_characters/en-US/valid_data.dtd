@@ -1,0 +1,3 @@
+<!-- This file contains valid characters that we expect to be allowed inside .xul files. -->
+<!ENTITY englishLetters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ">
+<!ENTITY numbers "0123456789">
