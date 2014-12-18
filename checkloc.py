@@ -62,7 +62,7 @@ BASE_LOC = 'en-US'
 #   name=string
 #   name:string
 # Assumptions: both comments and entries exist only on a single line.
-PROP_COMMENT = re.compile('[#!]+[^\n\r\f]*[\n\r\f]', re.DOTALL)
+PROP_COMMENT = re.compile('\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.DOTALL)
 PROP_SEP = re.compile('[\n\r\f]')
 # almost any character is a valid .properties key
 # except : and = , which note the transition to a value
