@@ -36,7 +36,7 @@ Or run ```>python checkloc/checkloc.py --help```
 6. No localization has duplicate keys defined in the same ```.properties``` file  
 	(the same key name defined in different files is okay - presumably they will be loaded and used in different string bundles)
 7. No key is blank
-8. Key names contain no invalid characters, including ```"!@#$%^&*<>[](){} ?```
+8. DTD keys contain no invalid characters, including ```"!@#$%^&*<>[](){} ?```
 9. DTD values contain no invalid characters, including ```"%<```
 10. DTD comments contain no double hyphens ```--```
 11. ```.properties``` values are valid, meaning either:
