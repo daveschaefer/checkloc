@@ -46,12 +46,14 @@ class TestChecklocModule(unittest.TestCase):
 
 	def test_invalid_data_is_caught(self):
 		dirs = os.listdir(TEST_DATA_DIR)
+		i = 1
 		for d in dirs:
 			if not d.startswith(INVALID_DATA_NAME):
 				continue
-			print "Checking invalid data in '{0}'...".format(d)
+			print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
 			errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
 			self.assertTrue(errors)
+			i += 1
 
 
 if __name__ == '__main__':
