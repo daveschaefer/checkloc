@@ -29,6 +29,11 @@ sys.path.append(
 
 from checkloc import validate_loc_files
 
+TEST_DATA_DIR = 'test/test_data'
+# start a directory with this name
+# to signify it contains invalid data that should be caught when parsed
+INVALID_DATA_NAME = 'invalid'
+
 
 class TestChecklocModule(unittest.TestCase):
 	"""
@@ -36,12 +41,17 @@ class TestChecklocModule(unittest.TestCase):
 	"""
 
 	def test_valid_data_is_parsed(self):
-		errors = validate_loc_files('test/test_data/valid_characters')
+		errors = validate_loc_files(os.path.join(TEST_DATA_DIR, 'valid_characters'))
 		self.assertFalse(errors)
 
-	def test_invalid_dtd_characters(self):
-		errors = validate_loc_files('test/test_data/invalid_dtd_quote_in_key')
-		self.assertTrue(errors)
+	def test_invalid_data_is_caught(self):
+		dirs = os.listdir(TEST_DATA_DIR)
+		for d in dirs:
+			if not d.startswith(INVALID_DATA_NAME):
+				continue
+			print "Checking invalid data in '{0}'...".format(d)
+			errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+			self.assertTrue(errors)
 
 
 if __name__ == '__main__':
