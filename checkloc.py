@@ -229,7 +229,7 @@ def _parse_properties_file(file_path, keys, subs):
 							# plus however many chars make up the numerical reference (if any)
 							x += 1
 							if pmatch.group(1):
-								numeric_subs_list.append(pmatch.group(1).replace('$', ''))
+								numeric_subs_list.append(int(pmatch.group(1).replace('$', '')))
 								logging.info("String substitution found. {0}".format(numeric_subs_list))
 								x += len(pmatch.group(1))
 						else:
@@ -245,7 +245,7 @@ def _parse_properties_file(file_path, keys, subs):
 						# different languages can of course use substitutions in different orders
 						# but sort so we can ensure the count and type are the same
 						numeric_subs_list.sort()
-						subs[key] = ''.join(numeric_subs_list)
+						subs[key] = ''.join(str(numeric_subs_list))
 
 				else:
 					keys[key] = value
