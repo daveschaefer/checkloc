@@ -195,7 +195,7 @@ def _parse_properties_file(file_path, keys, subs):
 			if not line.strip():
 				continue # skip blank lines
 			logging.info(".prop line: '{0}'".format(line))
-			subs_list = [] # list of string substitutions
+			numeric_subs_list = [] # list of numbered string substitutions, like %1$S.
 			match = PROP_LINE.match(line)
 			if (match):
 				key = file_name + LSEP + match.group(1)
@@ -229,8 +229,8 @@ def _parse_properties_file(file_path, keys, subs):
 							# plus however many chars make up the numerical reference (if any)
 							x += 1
 							if pmatch.group(1):
-								subs_list.append(pmatch.group(1).replace('$', ''))
-								logging.info("String substitution found. {0}".format(subs_list))
+								numeric_subs_list.append(pmatch.group(1).replace('$', ''))
+								logging.info("String substitution found. {0}".format(numeric_subs_list))
 								x += len(pmatch.group(1))
 						else:
 							_log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
@@ -244,8 +244,8 @@ def _parse_properties_file(file_path, keys, subs):
 						keys[key] = value
 						# different languages can of course use substitutions in different orders
 						# but sort so we can ensure the count and type are the same
-						subs_list.sort()
-						subs[key] = ''.join(subs_list)
+						numeric_subs_list.sort()
+						subs[key] = ''.join(numeric_subs_list)
 
 				else:
 					keys[key] = value
