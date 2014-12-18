@@ -57,15 +57,17 @@ LSEP = '/'
 BASE_LOC = 'en-US'
 
 # .properties files look like:
-#   #comments are ignored
+#   # comments are ignored
+#   ! this is also a comment
 #   name=string
+#   name:string
 # Assumptions: both comments and entries exist only on a single line.
 PROP_COMMENT = re.compile('[#!]+[^\n\r\f]*[\n\r\f]', re.DOTALL)
 PROP_SEP = re.compile('[\n\r\f]')
 # almost any character is a valid .properties key
 # except : and = , which note the transition to a value
 # note that \\\\ is used to specify a single \ is allowed in keys
-PROP_LINE = re.compile('([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)=([^\n\r\f]*)')
+PROP_LINE = re.compile('([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)[=:]([^\n\r\f]*)')
 
 DTD_PARSE_ERROR = re.compile('([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
