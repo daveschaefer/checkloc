@@ -67,7 +67,7 @@ PROP_SEP = re.compile('[\n\r\f]')
 # almost any character is a valid .properties key
 # except : and = , which note the transition to a value
 # note that \\\\ is used to specify a single \ is allowed in keys
-PROP_LINE = re.compile('([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)[=:]([^\n\r\f]*)')
+PROP_LINE = re.compile('([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
 
 DTD_PARSE_ERROR = re.compile('([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
