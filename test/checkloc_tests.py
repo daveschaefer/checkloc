@@ -39,6 +39,9 @@ class TestChecklocModule(unittest.TestCase):
 		errors = validate_loc_files('test/test_data/valid_characters')
 		self.assertFalse(errors)
 
+	def test_invalid_dtd_characters(self):
+		errors = validate_loc_files('test/test_data/invalid_dtd_quote_in_key')
+		self.assertTrue(errors)
 
 
 if __name__ == '__main__':
