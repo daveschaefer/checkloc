@@ -43,14 +43,19 @@ class TestChecklocModule(unittest.TestCase):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
-	parser.add_argument('--verbose', '-v', default=False, action='store_true',
+	verbosity_group = parser.add_mutually_exclusive_group()
+	verbosity_group.add_argument('--verbose', '-v', default=False, action='store_true',
 			help="Verbose mode. Print more info while testing.")
+	verbosity_group.add_argument('--quiet', '-q', default=False, action='store_true',
+			help="Quiet mode. Don't print much, not even error info.")
 
 	args = parser.parse_args()
 
 	loglevel = logging.WARNING
 	if (args.verbose):
 		loglevel = logging.INFO
+	elif (args.quiet):
+		loglevel = logging.CRITICAL
 
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
 	unittest.main()
