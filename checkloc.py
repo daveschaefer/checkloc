@@ -329,6 +329,10 @@ def validate_loc_files(loc_dir):
 
 	_get_loc_keys(os.path.join(loc_dir, baseline_name), baseline_keys, baseline_subs)
 
+	if (len(baseline_keys) < 1):
+		_log_error("Did not find any key in '{0}'!".format(baseline_name))
+		return True
+
 	if (any_errors):
 		return True # error message has already been printed above
 
