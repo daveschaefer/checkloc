@@ -38,7 +38,7 @@ Or run ```>python checkloc/checkloc.py --help```
 8. DTD values contain no invalid characters, including ```"%<```
 9. DTD comments contain no double hyphens ```--```
 10. No localization has duplicate keys defined in the same ```.properties``` file  
-	(the same key name defined in different files is okay - presumably they will be loaded and used in different string bundles)
+	(the same key defined in different ```.properties``` files is okay - presumably they will be loaded and used in different string bundles)
 11. ```.properties``` values are valid, meaning either:
   1. no ```%``` on a line
   2. double ```%%``` to escape and print a regular ```%```
