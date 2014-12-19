@@ -71,6 +71,18 @@ PROP_LINE = re.compile('([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)\s*[=:
 
 DTD_PARSE_ERROR = re.compile('([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
+# Firefox does not allow more than ten string substitution parameters, for performance reasons.
+# For details see nsStringBundle.cpp
+# https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp
+# The error actually happens if you pass more than 10 parameters inside javascript code;
+# specifying more than 10 substitutions in a .properties file
+# will simply cause the browser to use '(null)' or random/garbage data
+# for unprovided substitutions greater than ten.
+# However, we should still flag this as an error,
+# as it probably won't do what the author intended.
+MOZILLA_MAX_PROPERTIES_STRING_SUBS = 10
+
+
 any_errors = False
 
 
@@ -182,6 +194,7 @@ def _parse_properties_file(file_path, keys, subs):
 	https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files
 	"""
 	file_name = os.path.basename(file_path).replace(LSEP, '')
+	lang = os.path.basename(os.path.dirname(file_path))
 
 	with open(file_path, 'r') as openfile:
 		data = openfile.read()
@@ -245,6 +258,12 @@ def _parse_properties_file(file_path, keys, subs):
 						# different languages can of course use substitutions in different orders
 						# but sort so we can ensure the count and type are the same
 						numeric_subs_list.sort()
+						if numeric_subs_list and numeric_subs_list[-1] > MOZILLA_MAX_PROPERTIES_STRING_SUBS:
+							_log_error("More than {0} string substitutions found for key '{1}' "
+							"in '{2}'. Mozilla does not allow this for performance reasons. "
+							"See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
+							"".format(MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
+
 						subs[key] = ''.join(str(numeric_subs_list))
 
 				else:
