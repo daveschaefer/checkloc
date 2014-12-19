@@ -38,19 +38,20 @@ Or run ```>python checkloc/checkloc.py --help```
 8. DTD values contain no invalid characters, including ```"%<```  
 	(you can use the [HTML character entity codes](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) ```&quot;```, ```&#37;```, and ```&lt;``` if you need to use those characters inside a DTD value)
 9. DTD comments contain no double hyphens ```--```
-10. No localization has duplicate keys defined in the same ```.properties``` file  
+10. ```.properties``` keys contain no spaces
+11. No localization has duplicate keys defined in the same ```.properties``` file  
 	(the same key defined in different ```.properties``` files is okay - presumably they will be loaded and used in different string bundles)
-11. ```.properties``` values are valid, meaning either:
+12. ```.properties``` values are valid, meaning either:
   1. no ```%``` on a line
   2. double ```%%``` to escape and print a regular ```%```
   3. ```%S``` or ```%n$S``` , where ```n``` is a number, for formatted string replacement.
-12. ```.properties``` values use the same count and type of string substitutions across languages. e.g.:
+13. ```.properties``` values use the same count and type of string substitutions across languages. e.g.:
   1. If one language uses ```%1$S```, ```%2$S```, and ```%3$S```, they all should  
   (order of substitutions may of course differ between languages)
   2. If one language uses four ```%S``` they all should
-13. **Mozilla-specific:** No ```.properties``` value contains more than 10 unique string substitutions - either ```%S``` style, numbered ```%1$S``` style, or combined. [See References](#max10subs).  
+14. **Mozilla-specific:** No ```.properties``` value contains more than 10 unique string substitutions - either ```%S``` style, numbered ```%1$S``` style, or combined. [See References](#max10subs).  
   (It is of course valid to re-use any ```%1$S``` style numbered substitution as many times as you want)
-14. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
+15. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
 
 
 ### Possible future test cases
