@@ -209,6 +209,7 @@ def _parse_properties_file(file_path, keys, subs):
 				continue # skip blank lines
 			logging.info(".prop line: '{0}'".format(line))
 			numeric_subs_list = [] # list of numbered string substitutions, like %1$S.
+			regular_subs = 0
 			match = PROP_LINE.match(line)
 			if (match):
 				key = file_name + LSEP + match.group(1)
@@ -245,6 +246,8 @@ def _parse_properties_file(file_path, keys, subs):
 								numeric_subs_list.append(int(pmatch.group(1).replace('$', '')))
 								logging.info("String substitution found. {0}".format(numeric_subs_list))
 								x += len(pmatch.group(1))
+							else:
+								regular_subs += 1
 						else:
 							_log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
 								key, file_path, value, "{0}^".format(" " * x)))
@@ -258,7 +261,8 @@ def _parse_properties_file(file_path, keys, subs):
 						# different languages can of course use substitutions in different orders
 						# but sort so we can ensure the count and type are the same
 						numeric_subs_list.sort()
-						if numeric_subs_list and numeric_subs_list[-1] > MOZILLA_MAX_PROPERTIES_STRING_SUBS:
+						if (numeric_subs_list and numeric_subs_list[-1] > MOZILLA_MAX_PROPERTIES_STRING_SUBS) or \
+							regular_subs > MOZILLA_MAX_PROPERTIES_STRING_SUBS:
 							_log_error("More than {0} string substitutions found for key '{1}' "
 							"in '{2}'. Mozilla does not allow this for performance reasons. "
 							"See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
