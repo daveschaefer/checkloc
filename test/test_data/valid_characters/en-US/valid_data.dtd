@@ -1,3 +1,4 @@
 <!-- This file contains valid characters that we expect to be allowed inside .xul files. -->
+<!-- Having single - hyphens - inside a DTD comment - is still valid - even if they have a space between them - - -->
 <!ENTITY englishLetters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ">
 <!ENTITY numbers "0123456789">
