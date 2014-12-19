@@ -155,7 +155,7 @@ def _get_loc_keys(loc_dir, keys, properties_file_subs):
 							_log_error("Duplicate dtd key '{0}' found in {1}".format(\
 								key, file_path))
 						elif len(entity.content) < 1:
-							_log_error("Key '{0}' in {1} has a blank value".format(\
+							logging.warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
 								key, file_path))
 						# check for invalid content
 						# lxml will already check for '%' in values when it parses the file

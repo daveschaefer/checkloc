@@ -8,3 +8,6 @@
 <!ENTITY valueWithAQuotationMark " &quot;some value&quot; goes here">
 <!ENTITY valueWithAPercentSign "We would like 100&#37; of the profits.">
 <!ENTITY valueWithALessThanSign "01234&lt;56789">
+
+<!-- entities can have empty string values -->
+<!ENTITY emptyStringEntity "">
