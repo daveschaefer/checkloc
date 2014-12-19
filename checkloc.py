@@ -204,7 +204,8 @@ def _parse_properties_file(file_path, keys, subs):
 		data = openfile.read()
 
 		if (len(data) < 1):
-			raise AssertionError("{0} does not contain any lines".format(file_path))
+			logging.warning("{0} does not contain any lines".format(file_path))
+			return
 
 		data = re.sub(PROP_COMMENT, '', data)
 		data = re.split(PROP_SEP, data)
