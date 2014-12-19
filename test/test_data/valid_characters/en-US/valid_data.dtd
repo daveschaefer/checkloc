@@ -1,5 +1,6 @@
 <!-- This file contains valid characters that we expect to be allowed inside .xul files. -->
 <!-- Having single - hyphens - inside a DTD comment - is still valid - even if they have a space between them - - -->
+<!-- There may be little use for it, but you can put a double dash inside a DTD comment by using the HTML entity code &#45;&#45;&#45;&#45;&#45;&#45;&#45; -->
 <!ENTITY englishLetters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ">
 <!ENTITY numbers "0123456789">
 
