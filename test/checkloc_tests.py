@@ -31,6 +31,9 @@ from checkloc import validate_loc_files
 
 TEST_DATA_DIR = 'test/test_data'
 # start a directory with this name
+# to signify it contains only valid data and should parse without error
+VALID_DATA_NAME = 'valid'
+# start a directory with this name
 # to signify it contains invalid data that should be caught when parsed
 INVALID_DATA_NAME = 'invalid'
 
@@ -40,20 +43,21 @@ class TestChecklocModule(unittest.TestCase):
 	Run test cases against the checkloc module to make sure it is functioning correctly.
 	"""
 
-	def test_valid_data_is_parsed(self):
-		errors = validate_loc_files(os.path.join(TEST_DATA_DIR, 'valid_characters'))
-		self.assertFalse(errors)
-
-	def test_invalid_data_is_caught(self):
+	def test_valid_data_is_parsed_and_invalid_data_is_caught(self):
 		dirs = os.listdir(TEST_DATA_DIR)
 		i = 1
 		for d in dirs:
-			if not d.startswith(INVALID_DATA_NAME):
-				continue
-			print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
-			errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
-			self.assertTrue(errors)
-			i += 1
+			if d.startswith(VALID_DATA_NAME):
+				print "-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d)
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				self.assertFalse(errors)
+				i += 1
+			elif d.startswith(INVALID_DATA_NAME):
+				print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				self.assertTrue(errors)
+				i += 1
+			# ignore other directories
 
 
 if __name__ == '__main__':
