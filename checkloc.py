@@ -66,8 +66,11 @@ PROP_COMMENT = re.compile('\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.DOTALL)
 PROP_SEP = re.compile('[\n\r\f]')
 # almost any character is a valid .properties key
 # except : and = , which note the transition to a value
-# note that \\\\ is used to specify a single \ is allowed in keys
-PROP_LINE = re.compile('^\s*([A-Za-z0-9_.\-+\\\\{}\[\]!@$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
+# note that \\\\ is used to specify a single \ is allowed in keys.
+# Because we parse and remove PROP_COMMENTs first, that regex will catch any
+# '#' or '!' characters that are found as the first non-whitespace part of a line.
+# This means we can allow # and ! inside this regex and it's not as complex.
+PROP_LINE = re.compile('^\s*([A-Za-z0-9_.\-+\\\\{}\[\]!@#$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
 
 DTD_PARSE_ERROR = re.compile('([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
