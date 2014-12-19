@@ -65,8 +65,9 @@ BASE_LOC = 'en-US'
 PROP_COMMENT = re.compile('^\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.MULTILINE)
 PROP_SEP = re.compile('[\n\r\f]')
 # almost any character is a valid .properties key
-# except : and = , which note the transition to a value
-# note that \\\\ is used to specify a single \ is allowed in keys.
+# except : and = , which note the transition to a value,
+# and spaces.
+# note that \\\\ is used in the regex to specify a single \ .
 # Because we parse and remove PROP_COMMENTs first, that regex will catch any
 # '#' or '!' characters that are found as the first non-whitespace part of a line.
 # This means we can allow # and ! inside this regex and it's not as complex.
