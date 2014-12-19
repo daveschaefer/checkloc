@@ -324,7 +324,8 @@ def validate_loc_files(loc_dir):
 	del langs[BASE_LOC] # don't test the baseline localization against itself
 	
 	if (len(baseline_files) < 1):
-		raise AssertionError("Did not find any files in '{0}'!".format(baseline_name))
+		_log_error("Did not find any files in '{0}'!".format(baseline_name))
+		return True
 
 	_get_loc_keys(os.path.join(loc_dir, baseline_name), baseline_keys, baseline_subs)
 
