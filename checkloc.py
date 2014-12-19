@@ -262,7 +262,9 @@ def _parse_properties_file(file_path, keys, subs):
 						# but sort so we can ensure the count and type are the same
 						numeric_subs_list.sort()
 						if (numeric_subs_list and numeric_subs_list[-1] > MOZILLA_MAX_PROPERTIES_STRING_SUBS) or \
-							regular_subs > MOZILLA_MAX_PROPERTIES_STRING_SUBS:
+							regular_subs > MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
+							(numeric_subs_list and \
+								((numeric_subs_list[-1] + regular_subs) > MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
 							_log_error("More than {0} string substitutions found for key '{1}' "
 							"in '{2}'. Mozilla does not allow this for performance reasons. "
 							"See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
