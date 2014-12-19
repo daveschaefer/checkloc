@@ -356,7 +356,9 @@ def validate_loc_files(loc_dir):
 				_log_error("String substitution for key '{0}' found in '{1}' but not in baseline {2}!".format(\
 					key, lang, baseline_name))
 			elif subs[key] != baseline_subs[key]:
-				_log_error("String substitution does not match for '{0}' in '{1}' vs '{2}'.\n{1}:{3}\n{2}:{4}".format(\
+				_log_error("String substitution for key '{0}' in '{1}' "
+					"is not the same as baseline '{2}'. "
+					"Substitution count and type must match.\n{1}:{3}\n{2}:{4}".format(\
 					key, lang, baseline_name, subs[key], baseline_subs[key]))
 
 		for key in baseline_subs:
@@ -364,8 +366,10 @@ def validate_loc_files(loc_dir):
 				_log_error("String substitution for key '{0}' found in baseline {1} but not in '{2}'!".format(\
 					key, baseline_name, lang))
 			elif subs[key] != baseline_subs[key]:
-				_log_error("String substitution does not match for '{0}' in '{1}' vs '{2}'.\n{1}:{3}\n{2}:{4}".format(\
-					key, lang, baseline_name, subs[key], baseline_subs[key]))
+				_log_error("String substitution for key '{0}' in baseline '{1}' "
+					"is not the same as '{2}'. "
+					"Substitution count and type must match.\n{1}:{4}\n{2}:{3}".format(\
+					key, baseline_name, lang, subs[key], baseline_subs[key]))
 
 	print "Done!"
 	return any_errors
