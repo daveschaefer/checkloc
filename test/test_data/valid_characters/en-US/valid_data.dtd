@@ -4,10 +4,11 @@
 <!ENTITY englishLetters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ">
 <!ENTITY numbers "0123456789">
 
-<!-- The following characters are not allowed inside entity values: "%<. But you can use the HTML-entity escaped equivalents if you need to have them inside any value string. -->
+<!-- The following characters are not allowed inside entity values: "%<&. But you can use the HTML-entity escaped equivalents if you need to have them inside any value string. -->
 <!ENTITY valueWithAQuotationMark " &quot;some value&quot; goes here">
 <!ENTITY valueWithAPercentSign "We would like 100&#37; of the profits.">
 <!ENTITY valueWithALessThanSign "01234&lt;56789">
+<!ENTITY valueWithAnAmpersand "It's both ALine &amp; BLine">
 
 <!-- entities can have empty string values -->
 <!ENTITY emptyStringEntity "">

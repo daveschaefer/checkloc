@@ -35,8 +35,8 @@ Or run ```>python checkloc/checkloc.py --help```
 5. No localization is missing keys
 6. No key is blank
 7. DTD keys contain no invalid characters, including ```"!@#$%^&*<>[](){} ?'```
-8. DTD values contain no invalid characters, including ```"%<```  
-	(you can use the [HTML character entity codes](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) ```&quot;```, ```&#37;```, and ```&lt;``` if you need to use those characters inside a DTD value)
+8. DTD values contain no invalid characters, including ```"%<&```  
+	(you can use the [HTML character entity codes](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) ```&quot;```, ```&#37;```, ```&lt;```, and ```&amp;``` if you need to use those characters inside a DTD value)
 9. DTD comments contain no double hyphens ```--```
 10. ```.properties``` keys contain no spaces
 11. No localization has duplicate keys defined in the same ```.properties``` file  
