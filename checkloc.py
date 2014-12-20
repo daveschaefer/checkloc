@@ -319,7 +319,8 @@ def validate_loc_files(loc_dir):
 		langfiles[os.path.basename(root)] = files
 
 	if (len(langs) < 1):
-		raise AssertionError("Did not find any language folders inside {0}!".format(loc_dir))
+		_log_error("Did not find any language folders inside {0}!".format(loc_dir))
+		return True
 	print "Found {0} languages: {1}.".format(len(langs), langs.keys())
 
 	if BASE_LOC not in langs:
