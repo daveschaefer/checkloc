@@ -72,6 +72,13 @@ class TestChecklocModule(unittest.TestCase):
 		errors = validate_loc_files(file_name)
 		self.assertTrue(errors)
 
+	def test_finding_no_language_folders_raises_an_error(self):
+		empty_dir = os.path.join(TEST_DATA_DIR, 'other_no_lang_folders')
+		self.assertTrue(os.path.exists(empty_dir), "Test setup: directory {0} should exist".format(empty_dir))
+		self.assertTrue(os.path.isdir(empty_dir), "Test setup: {0} is a directory".format(empty_dir))
+		errors = validate_loc_files(empty_dir)
+		self.assertTrue(errors)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
