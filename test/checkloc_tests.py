@@ -79,6 +79,13 @@ class TestChecklocModule(unittest.TestCase):
 		errors = validate_loc_files(empty_dir)
 		self.assertTrue(errors)
 
+	def test_finding_no_baseline_folder_raises_an_error(self):
+		base_dir = os.path.join(TEST_DATA_DIR, 'other_no_baseline')
+		self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
+		self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
+		errors = validate_loc_files(base_dir)
+		self.assertTrue(errors)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
