@@ -10,5 +10,9 @@
 <!ENTITY valueWithALessThanSign "01234&lt;56789">
 <!ENTITY valueWithAnAmpersand "It's both ALine &amp; BLine">
 
+<!ENTITY useSingleQuoteInside "You can use a ' inside double quotes">
+<!ENTITY defineWithSingleQuote 'Defining an entity using single quotes is also valid'>
+<!ENTITY useDoubleQuoteInside 'You can use " characters inside an entity defined using single quotes'>
+
 <!-- entities can have empty string values -->
 <!ENTITY emptyStringEntity "">
