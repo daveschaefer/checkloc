@@ -11,6 +11,33 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+1.2
+----
+* Add basic unit tests to check parsing and validation
+* Change DTD parsing to retrieve the first error, rather than the last
++ On DTD parsing error, print the offending line and highlight the place where the error might be
+  (to help with troubleshooting and fixing)
+* Convert error for empty DTD values to warning (empty DTD values will work, but may not be what you want)
+* Fix bug parsing '%S' matches in .properties files
+* Fix bug detecting when one language contains a .properties string substitution that is not in the baseline
++ Properly detect when the baseline contains a .properties string substitution that is not found in all other languages
+* Fix and improve many behaviours for parsing .properties files (thanks to foudfou for inspiring this with a pull request):
+	* .properties comments can also start with !
+	* Allow many additional characters in .properties keys .-+\{}[]!@#$%^&*()/<>,?;'"`~|
+	* Allow : to separate .properties keys and values
+	* Allow whitespace between key names and values
+	* Allow whitespace before key names
+	* Comment characters # and ! can be used inside .properties values
+	.properties file parsing should now more closely match the specification and tests run against Firefox
++ Add Mozilla-specific test: no more than 10 unique string substitutions in any .properties value
+* Fix .properties comment regex
++ Optimization: skip blank lines when parsing .properties files
+* Convert assertions to normal errors and make the script exit normally/gracefully under those conditions (ensures we always have consistent output and can be called on anything)
+* Copyedit feedback messages
++ Add several new info missages when parsing
+* Copyedit README
+
+
 1.1.1
 -----
 * Fix path calculation to work for all types of path parameters
