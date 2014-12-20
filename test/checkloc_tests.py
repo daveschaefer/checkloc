@@ -59,6 +59,12 @@ class TestChecklocModule(unittest.TestCase):
 				i += 1
 			# ignore other directories
 
+	def test_nonexistent_directories_raise_an_error(self):
+		non_existent_dir = os.path.join(TEST_DATA_DIR, 'null_empty')
+		self.assertFalse(os.path.exists(non_existent_dir), "Test setup: directory {0} should not exist".format(non_existent_dir))
+		errors = validate_loc_files(non_existent_dir)
+		self.assertTrue(errors)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
