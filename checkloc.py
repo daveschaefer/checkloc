@@ -309,7 +309,8 @@ def validate_loc_files(loc_dir):
 	logging.info("Loc directory {0} exists.".format(loc_dir))
 
 	if not (os.path.isdir(loc_dir)):
-		raise AssertionError("{0} is not a directory!".format(loc_dir))
+		_log_error("{0} is not a directory!".format(loc_dir))
+		return True
 	logging.info("{0} is a directory.".format(loc_dir))
 
 	for (root, dirs, files) in os.walk(loc_dir):
