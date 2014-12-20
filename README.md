@@ -67,3 +67,4 @@ Or run ```>python checkloc/checkloc.py --help```
 	```// this function supports at most 10 parameters.. see below for why```  
 	```// ...```  
 	```NS_ENSURE_ARG(aLength <= 10); // enforce 10-parameter limit```
+4. [Extensible Markup Language (XML) 1.1](http://www.w3.org/TR/xml11/#sec-entity-decl])
