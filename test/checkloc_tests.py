@@ -65,6 +65,13 @@ class TestChecklocModule(unittest.TestCase):
 		errors = validate_loc_files(non_existent_dir)
 		self.assertTrue(errors)
 
+	def test_passing_non_directory_raises_an_error(self):
+		file_name = os.path.join(TEST_DATA_DIR, 'test_file.txt')
+		self.assertTrue(os.path.exists(file_name), "Test setup: file {0} exists".format(file_name))
+		self.assertFalse(os.path.isdir(file_name), "Test setup: file {0} is not a directory".format(file_name))
+		errors = validate_loc_files(file_name)
+		self.assertTrue(errors)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
