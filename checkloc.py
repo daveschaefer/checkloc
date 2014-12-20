@@ -324,8 +324,9 @@ def validate_loc_files(loc_dir):
 	print "Found {0} languages: {1}.".format(len(langs), langs.keys())
 
 	if BASE_LOC not in langs:
-		raise AssertionError("Base language folder '{0}' was not found in {1}".format(\
+		_log_error("Base language folder '{0}' was not found in {1}".format(\
 			BASE_LOC, loc_dir))
+		return True
 
 	baseline_name = BASE_LOC
 	baseline_files.extend(langfiles[baseline_name])
