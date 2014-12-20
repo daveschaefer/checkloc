@@ -304,7 +304,8 @@ def validate_loc_files(loc_dir):
 
 	loc_dir = os.path.abspath(loc_dir)
 	if not (os.path.exists(loc_dir)):
-		raise AssertionError("The localization directory {0} does not exist!".format(loc_dir))
+		_log_error("The localization directory {0} does not exist!".format(loc_dir))
+		return True
 	logging.info("Loc directory {0} exists.".format(loc_dir))
 
 	if not (os.path.isdir(loc_dir)):
