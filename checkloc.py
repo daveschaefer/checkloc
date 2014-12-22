@@ -115,6 +115,17 @@ class LocalizationLanguage:
 		self.loc_dir = os.path.join(localization_base_dir, language)
 		self.name = language
 
+		self.parsing_errors = False
+
+	def _log_error(self, msg):
+		"""
+		Log an error.
+		"""
+		# this function wraps setting the parsing error flag
+		# to keep all error code in one place
+		self.parsing_errors = True
+		logging.error(msg)
+
 
 	def _extract_first_dtd_parse_error_info(self, err):
 		"""
@@ -139,6 +150,9 @@ class LocalizationLanguage:
 
 		This function only reads data from Mozilla-style localization files:
 		XML DTD and .properties files.
+
+		Returns True if there were any parsing errors,
+		and False otherwise.
 		"""
 		loc_files = []
 
@@ -157,7 +171,7 @@ class LocalizationLanguage:
 			bytes = min(32, os.path.getsize(file_path))
 			with open(file_path, 'rb') as rawfile:
 				if rawfile.read(bytes).startswith(codecs.BOM_UTF8):
-					_log_error("File '{0}' contains Byte Order Marker; localization files should not contain BOM."\
+					self._log_error("File '{0}' contains Byte Order Marker; localization files should not contain BOM."\
 						.format(file_path))
 
 			if (file_path.endswith('.dtd')):
@@ -169,7 +183,7 @@ class LocalizationLanguage:
 							# it always takes the first entry.
 							key = file_name + self.LSEP + entity.name
 							if key in self.keys:
-								_log_error("Duplicate dtd key '{0}' found in {1}".format(\
+								self._log_error("Duplicate dtd key '{0}' found in {1}".format(\
 									key, file_path))
 							elif len(entity.content) < 1:
 								logging.warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
@@ -177,7 +191,7 @@ class LocalizationLanguage:
 							# check for invalid content
 							# lxml will already check for '%' in values when it parses the file
 							elif '<' in entity.content:
-								_log_error("The value for '{0}' in {1} contains the invalid character '<'. This is not allowed; please remove this character.".format(\
+								self._log_error("The value for '{0}' in {1} contains the invalid character '<'. This is not allowed; please remove this character.".format(\
 									key, file_path))
 							else:
 								self.keys[key] = entity.content
@@ -196,7 +210,7 @@ class LocalizationLanguage:
 							error_line, highlight_string,
 							"Full error details:",
 							ex.error_log)
-						_log_error("Could not parse {0}: {1}".format(\
+						self._log_error("Could not parse {0}: {1}".format(\
 							file_path, error_message))
 
 			elif (file_path.endswith('.properties')):
@@ -205,7 +219,7 @@ class LocalizationLanguage:
 				# not neccesarily a failure - there may just be extra files lying around.
 				logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
-		return
+		return self.parsing_errors
 
 	def _parse_properties_file(self, file_path):
 		"""
@@ -237,10 +251,10 @@ class LocalizationLanguage:
 					key = file_name + self.LSEP + match.group(1)
 					value = match.group(2)
 					if key in self.keys:
-						_log_error("Duplicate property key '{0}' found in {1}".format(\
+						self._log_error("Duplicate property key '{0}' found in {1}".format(\
 							key, file_path))
 					elif len(value) < 1:
-						_log_error("Key '{0}' in {1} has a blank value".format(\
+						self._log_error("Key '{0}' in {1} has a blank value".format(\
 							key, file_path))
 					# the only special character for .properties files is %
 					# used to substitute values when calling strbundle.getFormattedString().
@@ -271,7 +285,7 @@ class LocalizationLanguage:
 								else:
 									regular_subs += 1
 							else:
-								_log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
+								self._log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
 									key, file_path, value, "{0}^".format(" " * x)))
 								valid = False
 								break
@@ -287,7 +301,7 @@ class LocalizationLanguage:
 								regular_subs > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
 								(numeric_subs_list and \
 									((numeric_subs_list[-1] + regular_subs) > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
-								_log_error("More than {0} string substitutions found for key '{1}' "
+								self._log_error("More than {0} string substitutions found for key '{1}' "
 								"in '{2}'. Mozilla does not allow this for performance reasons. "
 								"See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
 								"".format(self.MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
@@ -297,7 +311,7 @@ class LocalizationLanguage:
 					else:
 						self.keys[key] = value
 				elif len(line) > 0: # not an empty string
-					_log_error("line '{0}' does not match any .properties file patterns for {1}".format(\
+					self._log_error("line '{0}' does not match any .properties file patterns for {1}".format(\
 						line, file_path))
 
 		return
@@ -352,7 +366,8 @@ def validate_loc_files(loc_dir):
 		return True
 
 	baseline = LocalizationLanguage(loc_dir, baseline_name)
-	baseline.get_loc_keys()
+	parse_errors = baseline.get_loc_keys()
+	any_errors = any_errors or parse_errors
 
 	if (len(baseline.keys) < 1):
 		_log_error("Did not find any key in '{0}'!".format(baseline.name))
@@ -366,7 +381,8 @@ def validate_loc_files(loc_dir):
 
 	for lang in langs:
 		loc = LocalizationLanguage(loc_dir, lang)
-		loc.get_loc_keys()
+		parse_errors = loc.get_loc_keys()
+		any_errors = any_errors or parse_errors
 
 		for key in loc.keys:
 			if (key not in baseline.keys):
