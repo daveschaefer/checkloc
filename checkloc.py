@@ -326,8 +326,6 @@ def validate_loc_files(loc_dir):
 	any_errors = False
 
 	langs = {}
-	langfiles = {}
-	baseline_files = []
 
 	print "Starting Localization tests..."
 
@@ -345,7 +343,6 @@ def validate_loc_files(loc_dir):
 	for (root, dirs, files) in os.walk(loc_dir):
 		for dir in dirs:
 			langs[dir] = True
-		langfiles[os.path.basename(root)] = files
 
 	if (len(langs) < 1):
 		_log_error("Did not find any language folders inside {0}!".format(loc_dir))
@@ -357,20 +354,12 @@ def validate_loc_files(loc_dir):
 			BASE_LOC, loc_dir))
 		return True
 
-	baseline_name = BASE_LOC
-	baseline_files.extend(langfiles[baseline_name])
-	del langs[BASE_LOC] # don't test the baseline localization against itself
-	
-	if (len(baseline_files) < 1):
-		_log_error("Did not find any files in '{0}'!".format(baseline_name))
-		return True
-
-	baseline = LocalizationLanguage(loc_dir, baseline_name)
+	baseline = LocalizationLanguage(loc_dir, BASE_LOC)
 	parse_errors = baseline.get_loc_keys()
 	any_errors = any_errors or parse_errors
 
 	if (len(baseline.keys) < 1):
-		_log_error("Did not find any key in '{0}'!".format(baseline.name))
+		_log_error("Did not find any keys in '{0}'!".format(baseline.name))
 		return True
 
 	if (any_errors):
@@ -378,6 +367,8 @@ def validate_loc_files(loc_dir):
 
 	print "{0} keys found in baseline '{1}'.".format(\
 		len(baseline.keys), baseline.name)
+
+	del langs[BASE_LOC] # don't test the baseline localization against itself
 
 	for lang in langs:
 		loc = LocalizationLanguage(loc_dir, lang)
