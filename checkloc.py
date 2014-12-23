@@ -39,7 +39,7 @@ except ImportError:
 # MAJOR version when you make backwards-incompatible changes,
 # MINOR version when you add functionality in a backwards-compatible manner
 # PATCH version when you make backwards-compatible bug fixes.
-VERSION = "1.1.1"
+VERSION = "1.2"
 
 # the en-US translation will have all files and strings created. Use it as the base.
 BASE_LOC = 'en-US'
