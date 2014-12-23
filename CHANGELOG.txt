@@ -37,7 +37,7 @@ We attempt to use meaningful version numbers, following semver.org:
 * Copyedit feedback messages
 + Add several new info missages when parsing
 * Copyedit README
-i Refactor localization parsing and storage into its own class
+i Refactor localization parsing and storage code into its own class
 
 
 1.1.1
