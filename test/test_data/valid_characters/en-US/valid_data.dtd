@@ -16,3 +16,4 @@
 
 <!-- entities can have empty string values -->
 <!ENTITY emptyStringEntity "">
+<!ENTITY anotherEmptyStringEntity ''>
