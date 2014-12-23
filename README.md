@@ -53,6 +53,13 @@ Or run ```>python checkloc/checkloc.py --help```
   (It is of course valid to re-use any ```%1$S``` style numbered substitution as many times as you want)
 15. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
 
+### Current Warnings
+
+The following cases generate warnings, but not errors.
+
+1. Empty DTD values: ```""``` or ```''```  
+Using empty DTD values is valid, and your extension will build and run normally. No string will be displayed, however, so this may not be what you want.
+
 
 ### Possible future test cases
 
