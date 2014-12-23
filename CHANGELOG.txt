@@ -35,7 +35,7 @@ We attempt to use meaningful version numbers, following semver.org:
 + Optimization: skip blank lines when parsing .properties files
 * Convert assertions to normal errors and make the script exit normally/gracefully under those conditions (ensures we always have consistent output and can be called on anything)
 * Copyedit feedback messages
-+ Add several new info missages when parsing
++ Add several new info messages when parsing
 * Copyedit README
 i Refactor localization parsing and storage code into its own class
 
