@@ -1,0 +1,19 @@
+<!-- This file contains valid characters that we expect to be allowed inside .xul files. -->
+<!-- Having single - hyphens - inside a DTD comment - is still valid - even if they have a space between them - - -->
+<!-- There may be little use for it, but you can put a double dash inside a DTD comment by using the HTML entity code &#45;&#45;&#45;&#45;&#45;&#45;&#45; -->
+<!ENTITY englishLetters "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ">
+<!ENTITY numbers "0123456789">
+
+<!-- The following characters are not allowed inside entity values: "%<&. But you can use the HTML-entity escaped equivalents if you need to have them inside any value string. -->
+<!ENTITY valueWithAQuotationMark " &quot;some value&quot; goes here">
+<!ENTITY valueWithAPercentSign "We would like 100&#37; of the profits.">
+<!ENTITY valueWithALessThanSign "01234&lt;56789">
+<!ENTITY valueWithAnAmpersand "It's both ALine &amp; BLine">
+
+<!ENTITY useSingleQuoteInside "You can use a ' inside double quotes">
+<!ENTITY defineWithSingleQuote 'Defining an entity using single quotes is also valid'>
+<!ENTITY useDoubleQuoteInside 'You can use " characters inside an entity defined using single quotes'>
+
+<!-- entities can have empty string values -->
+<!ENTITY emptyStringEntity "">
+<!ENTITY anotherEmptyStringEntity ''>

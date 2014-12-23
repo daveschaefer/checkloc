@@ -1,0 +1,3 @@
+This file is used during the unit tests for the checkloc module.
+It is here to test that running checkloc against a file rather than a directory
+flags an error and exits gracefully.

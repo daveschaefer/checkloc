@@ -1,0 +1,2 @@
+This file only exists so we have something to add to git.
+This test case checks how we handle a locale folder that contains no localization data.
