@@ -59,7 +59,7 @@ Or run ```>python checkloc/checkloc.py --help```
 
 1. ```.properties``` keys contain no spaces
 2. No ```.properties``` value contains more than 10 unique string substitutions - either ```%S```-style, numbered ```%1$S```-style, or combined. [See References](#max10subs).  
-  (It is of course valid to re-use any ```%1$S```-style numbered substitution as many times as you want)
+  (It is of course valid to re-use any one ```%1$S```-style numbered substitution as many times as you want)
 
 ### Warnings
 
