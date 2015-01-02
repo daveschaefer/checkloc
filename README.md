@@ -61,6 +61,18 @@ Or run ```>python checkloc/checkloc.py --help```
 2. No ```.properties``` value contains more than 10 unique string substitutions - either ```%S```-style, numbered ```%1$S```-style, or combined. [See References](#max10subs).  
   (It is of course valid to re-use any ```%1$S```-style numbered substitution as many times as you want)
 
+### Manifest files
+
+1. All ```locale``` entries in ```chrome.manifest``` have a locale folder in the correct location on disk
+2. All locale folders on disk have an entry in ```chrome.manifest```
+3. No ```locale``` in ```chrome.manifest``` is defined more than once
+4. *Warning only:* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
+5. ```install.rdf``` contains only valid XML
+6. *Warning only:* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
+7. *Warning only:* All locale folders on disk have an entry in ```install.rdf```
+8. No ```<em:locale>``` in ```install.rdf``` is defined more than once
+9. *Warning only:* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
+
 ### Warnings
 
 The following cases generate warnings, but not errors.
@@ -83,3 +95,7 @@ Using empty DTD values is valid, and your extension will build and run normally.
 	```// ...```  
 	```NS_ENSURE_ARG(aLength <= 10); // enforce 10-parameter limit```
 4. [Extensible Markup Language (XML) 1.1](http://www.w3.org/TR/xml11/#sec-entity-decl])
+5. [```chrome.manifest``` file format](https://developer.mozilla.org/en-US/docs/Chrome_Registration)
+6. [Add-on Install Manifests](https://developer.mozilla.org/en-US/Add-ons/Install_Manifests)
+7. [Mozilla Localization ("L10n") Teams](https://wiki.mozilla.org/L10n:Localization_Teams)
+8. [Mozilla Locale Codes](https://wiki.mozilla.org/L10n:Locale_Codes)
