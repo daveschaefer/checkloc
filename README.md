@@ -28,6 +28,8 @@ Or run ```>python checkloc/checkloc.py --help```
 
 ## Current test cases
 
+Test cases marked with *[w]* generate a warning; all other cases generate errors.
+
 ### Basic validation and syntax
 
 1. No localization has extra files
@@ -66,12 +68,12 @@ Or run ```>python checkloc/checkloc.py --help```
 1. All ```locale``` entries in ```chrome.manifest``` have a locale folder in the correct location on disk
 2. All locale folders on disk have an entry in ```chrome.manifest```
 3. No ```locale``` in ```chrome.manifest``` is defined more than once
-4. *Warning only:* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
+4. *[w]* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
 5. ```install.rdf``` contains only valid XML
-6. *Warning only:* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
-7. *Warning only:* All locale folders on disk have an entry in ```install.rdf```
+6. *[w]* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
+7. *[w]* All locale folders on disk have an entry in ```install.rdf```
 8. No ```<em:locale>``` in ```install.rdf``` is defined more than once
-9. *Warning only:* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
+9. *[w]* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
 
 ### Warnings
 
