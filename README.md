@@ -41,12 +41,14 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 7. DTD keys contain no invalid characters, including ```"!@#$%^&*<>[](){} ?'```
 8. DTD values contain no invalid characters, including ```"%<&```  
 	(you can use the [HTML character entity codes](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) ```&quot;```, ```&#37;```, ```&lt;```, and ```&amp;``` if you need to use those characters inside a DTD value)
-9. DTD comments contain no double hyphens ```--```
-10. ```.properties``` values are valid, meaning either:
+9. *[w]* DTD values are not empty: ```""``` or ```''```  
+  (using empty DTD values is valid, and your extension will build and run normally. No string will be displayed, however, so this may not be what you want)
+10. DTD comments contain no double hyphens ```--```
+11. ```.properties``` values are valid, meaning either:
   1. no ```%``` on a line
   2. double ```%%``` to escape and print a regular ```%```
   3. ```%S``` or ```%n$S``` , where ```n``` is a number, for formatted string replacement.
-11. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
+12. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
 
 ### Language consistency
 
@@ -74,13 +76,6 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 7. *[w]* All locale folders on disk have an entry in ```install.rdf```
 8. No ```<em:locale>``` in ```install.rdf``` is defined more than once
 9. *[w]* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
-
-### Warnings
-
-The following cases generate warnings, but not errors.
-
-1. Empty DTD values: ```""``` or ```''```  
-Using empty DTD values is valid, and your extension will build and run normally. No string will be displayed, however, so this may not be what you want.
 
 
 ## Possible future test cases
