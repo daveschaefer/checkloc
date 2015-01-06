@@ -435,7 +435,7 @@ def _validate_manifests(loc_dir, langs):
 
 
 
-def validate_loc_files(loc_dir):
+def validate_loc_files(loc_dir, parse_manifests=True):
 	"""
 	Validate localization contents inside the given base directory.
 	Return True if there were any errors and False otherwise.
@@ -472,8 +472,8 @@ def validate_loc_files(loc_dir):
 			BASE_LOC, loc_dir))
 		return True
 
-	_validate_manifests(loc_dir, langs)
-	#TODO else error unless --no-manifest is set.
+	if (parse_manifests):
+		_validate_manifests(loc_dir, langs)
 
 	baseline = LocalizationLanguage(loc_dir, BASE_LOC)
 	parse_errors = baseline.get_loc_keys()
@@ -542,6 +542,11 @@ if __name__ == '__main__':
 	verbosity_group.add_argument('--quiet', '-q', default=False, action='store_true',
 			help="Quiet mode. Don't print much, not even error info.")
 
+	parser.add_argument('--no-manifest', '--nm', default=False, action='store_true',
+			help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
+				"Mainly intended to allow easier unit-testing of checkloc itself; "
+				"you should usually *NOT* use this flag.")
+
 	args = parser.parse_args()
 
 	loglevel = logging.WARNING
@@ -551,7 +556,12 @@ if __name__ == '__main__':
 		loglevel = logging.CRITICAL
 
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
-	errors = validate_loc_files(args.loc_dir)
+
+	parse_manifests = True
+	if (args.no_manifest):
+		parse_manifests = False
+
+	errors = validate_loc_files(args.loc_dir, parse_manifests=parse_manifests)
 	if (errors):
 		sys.exit(1)
 	else:
