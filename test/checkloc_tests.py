@@ -49,12 +49,12 @@ class TestChecklocModule(unittest.TestCase):
 		for d in dirs:
 			if d.startswith(VALID_DATA_NAME):
 				print "-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d)
-				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
 				self.assertFalse(errors)
 				i += 1
 			elif d.startswith(INVALID_DATA_NAME):
 				print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
-				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
 				self.assertTrue(errors)
 				i += 1
 			# ignore other directories
@@ -62,28 +62,28 @@ class TestChecklocModule(unittest.TestCase):
 	def test_nonexistent_directories_raise_an_error(self):
 		non_existent_dir = os.path.join(TEST_DATA_DIR, 'null_empty')
 		self.assertFalse(os.path.exists(non_existent_dir), "Test setup: directory {0} should not exist".format(non_existent_dir))
-		errors = validate_loc_files(non_existent_dir)
+		errors = validate_loc_files(non_existent_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_passing_non_directory_raises_an_error(self):
 		file_name = os.path.join(TEST_DATA_DIR, 'test_file.txt')
 		self.assertTrue(os.path.exists(file_name), "Test setup: file {0} exists".format(file_name))
 		self.assertFalse(os.path.isdir(file_name), "Test setup: file {0} is not a directory".format(file_name))
-		errors = validate_loc_files(file_name)
+		errors = validate_loc_files(file_name, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_finding_no_language_folders_raises_an_error(self):
 		empty_dir = os.path.join(TEST_DATA_DIR, 'other_no_lang_folders')
 		self.assertTrue(os.path.exists(empty_dir), "Test setup: directory {0} should exist".format(empty_dir))
 		self.assertTrue(os.path.isdir(empty_dir), "Test setup: {0} is a directory".format(empty_dir))
-		errors = validate_loc_files(empty_dir)
+		errors = validate_loc_files(empty_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_finding_no_baseline_folder_raises_an_error(self):
 		base_dir = os.path.join(TEST_DATA_DIR, 'other_no_baseline')
 		self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
 		self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
-		errors = validate_loc_files(base_dir)
+		errors = validate_loc_files(base_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
 
