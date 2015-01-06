@@ -165,7 +165,7 @@ class LocalizationLanguage:
 			loc_files.extend(files)
 
 		logging.info("Checking files in {0}".format(self.loc_dir))
-		for file_name in files:
+		for file_name in loc_files:
 			file_path = os.path.normpath(os.path.join(self.loc_dir, file_name))
 			file_name = file_name.replace(self.LSEP, '')
 
