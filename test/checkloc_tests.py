@@ -86,6 +86,16 @@ class TestChecklocModule(unittest.TestCase):
 		errors = validate_loc_files(base_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
+	def test_finding_no_loc_data_raises_an_error(self):
+		# by this we mean: no Mozilla-style localization data of any kind.
+		# the folder could contain anything, but it's not in the format we're expecting.
+		# the script should still fail gracefully in this case.
+		base_dir = TEST_DATA_DIR
+		self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
+		self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
+		errors = validate_loc_files(base_dir)
+		self.assertTrue(errors)
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser(description=__doc__)
