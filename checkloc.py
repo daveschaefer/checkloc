@@ -26,11 +26,12 @@ import logging
 import os
 import re
 import sys
+import warnings
 
 try:
 	from lxml import etree
 except ImportError:
-	logging.warning("python lxml library not found; localization tests cannot be run. Please install the python 'lxml' library to run localization tests.")
+	warnings.warn("python lxml library not found; localization tests cannot be run. Please install the python 'lxml' library to run localization tests.")
 	sys.exit(0)
 
 import localecodes
@@ -58,6 +59,15 @@ def _log_error(msg):
 
 	any_errors = True
 	logging.error(msg)
+
+def _format_warning(message, category, filename, lineno, line=None):
+	"""
+	Format a warning message and return it as a string.
+
+	Overrides the warnings module's built-in formatwarning() function
+	so we can format warnings using this module's log formatting.
+	"""
+	return message
 
 
 class LocalizationLanguage:
@@ -190,7 +200,7 @@ class LocalizationLanguage:
 								self._log_error("Duplicate dtd key '{0}' found in {1}".format(\
 									key, file_path))
 							elif len(entity.content) < 1:
-								logging.warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
+								warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
 									key, file_path))
 							# check for invalid content
 							# lxml will already check for '%' in values when it parses the file
@@ -221,7 +231,7 @@ class LocalizationLanguage:
 				self._parse_properties_file(file_path)
 			else:
 				# not neccesarily a failure - there may just be extra files lying around.
-				logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
+				warnings.warn("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
 		return self.parsing_errors
 
@@ -239,7 +249,7 @@ class LocalizationLanguage:
 			data = openfile.read()
 
 			if (len(data) < 1):
-				logging.warning("{0} does not contain any lines".format(file_path))
+				warnings.warn("{0} does not contain any lines".format(file_path))
 				return
 
 			data = re.sub(self.PROP_COMMENT, '', data)
@@ -404,23 +414,23 @@ def _validate_manifests(loc_dir, langs):
 					locale, manifest_locales[locale], locale_path))
 
 		if locale not in localecodes.MOZILLA_LOCALE_CODES:
-			logging.warning("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+			warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
 				locale))
 
 	# check every install.rdf entry to make sure a locale folder exists
 	for locale in rdf_locales:
 		locale_path = os.path.join(loc_dir, locale)
 		if not (os.path.exists(locale_path)):
-			logging.warning("Locale folder '{0}' is specified in install.rdf "
+			warnings.warn("Locale folder '{0}' is specified in install.rdf "
 				"but {1} does not exist!".format(
 					locale, locale_path))
 		elif not (os.path.isdir(locale_path)):
-			logging.warning("Locale folder '{0}' is specified in install.rdf "
+			warnings.warn("Locale folder '{0}' is specified in install.rdf "
 				"but {1} is not a folder!".format(
 					locale, locale_path))
 
 		if locale not in localecodes.MOZILLA_LOCALE_CODES:
-			logging.warning("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+			warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
 				locale))
 
 	# check every locale folder to ensure both
@@ -430,7 +440,7 @@ def _validate_manifests(loc_dir, langs):
 			_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
 				"exists in the chrome.manifest.".format(lang, loc_dir))
 		if (lang not in rdf_locales):
-			logging.warning("Locale folder '{0}' exists in {1}, but no corresponding entry "
+			warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
 				"exists in install.rdf.".format(lang, loc_dir))
 
 
@@ -556,6 +566,10 @@ if __name__ == '__main__':
 		loglevel = logging.CRITICAL
 
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
+	# send warning messages through our logging system
+	# with the desired formatting
+	logging.captureWarnings(True)
+	warnings.formatwarning=_format_warning
 
 	parse_manifests = True
 	if (args.no_manifest):
