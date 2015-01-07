@@ -1,0 +1,3 @@
+<!-- entities can have empty string values, but this should generate a warning -->
+<!ENTITY emptyStringEntity "">
+<!ENTITY anotherEmptyStringEntity ''>
