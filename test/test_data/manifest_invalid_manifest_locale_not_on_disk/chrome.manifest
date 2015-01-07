@@ -1,0 +1,6 @@
+# test chrome.locale
+
+locale checkloc-tests en-US chrome/locale/en-US/
+
+# add a locale entry that is not on disk
+locale checkloc-tests fr chrome/locale/fr/
