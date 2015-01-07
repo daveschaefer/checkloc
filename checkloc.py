@@ -199,15 +199,15 @@ class LocalizationLanguage:
 							if key in self.keys:
 								self._log_error("Duplicate dtd key '{0}' found in {1}".format(\
 									key, file_path))
-							elif len(entity.content) < 1:
-								warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
-									key, file_path))
 							# check for invalid content
 							# lxml will already check for '%' in values when it parses the file
 							elif '<' in entity.content:
 								self._log_error("The value for '{0}' in {1} contains the invalid character '<'. This is not allowed; please remove this character.".format(\
 									key, file_path))
 							else:
+								if len(entity.content) < 1:
+									warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
+										key, file_path))
 								self.keys[key] = entity.content
 
 					except (etree.DTDParseError) as ex:
