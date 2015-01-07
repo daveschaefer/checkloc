@@ -37,6 +37,14 @@ VALID_DATA_NAME = 'valid'
 # to signify it contains invalid data that should be caught when parsed
 INVALID_DATA_NAME = 'invalid'
 
+# to run tests that include parsing the manifest files
+# chrome.manifest and install.rdf
+# start the folder with these prefixes
+MANIFEST_NAME = 'manifest_'
+MANIFEST_INVALID_NAME = MANIFEST_NAME + INVALID_DATA_NAME
+MANIFEST_VALID_NAME = MANIFEST_NAME + VALID_DATA_NAME
+LOCALE_PATH = 'chrome/locale'
+
 
 class TestChecklocModule(unittest.TestCase):
 	"""
@@ -56,6 +64,20 @@ class TestChecklocModule(unittest.TestCase):
 				print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
 				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
 				self.assertTrue(errors)
+				i += 1
+			elif d.startswith(MANIFEST_VALID_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d)
+				errors = validate_loc_files(target_dir, parse_manifests=True)
+				self.assertFalse(errors,
+					"Valid manifest test '{0}' should not generate any errors.".format(d))
+				i += 1
+			elif d.startswith(MANIFEST_INVALID_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d)
+				errors = validate_loc_files(target_dir, parse_manifests=True)
+				self.assertTrue(errors,
+					"Invalid manifest test '{0}' should generate at least one error.".format(d))
 				i += 1
 			# ignore other directories
 
