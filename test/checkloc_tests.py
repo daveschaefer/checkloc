@@ -22,6 +22,7 @@ import logging
 import os
 import sys
 import unittest
+import warnings
 
 # prepend parent directory so we can import the checkloc module
 sys.path.append(
@@ -43,6 +44,7 @@ INVALID_DATA_NAME = 'invalid'
 MANIFEST_NAME = 'manifest_'
 MANIFEST_INVALID_NAME = MANIFEST_NAME + INVALID_DATA_NAME
 MANIFEST_VALID_NAME = MANIFEST_NAME + VALID_DATA_NAME
+MANIFEST_WARNING_NAME = MANIFEST_NAME + 'warn'
 LOCALE_PATH = 'chrome/locale'
 
 
@@ -78,6 +80,24 @@ class TestChecklocModule(unittest.TestCase):
 				errors = validate_loc_files(target_dir, parse_manifests=True)
 				self.assertTrue(errors,
 					"Invalid manifest test '{0}' should generate at least one error.".format(d))
+				i += 1
+			elif d.startswith(MANIFEST_WARNING_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning...".format(i, d)
+				# capture all warnings so we can verify that they happen
+				with warnings.catch_warnings(record=True) as w:
+					errors = validate_loc_files(target_dir, parse_manifests=True)
+					self.assertFalse(errors,
+						"Warning test '{0}' should not generate any errors.".format(d))
+					self.assertTrue(len(w) > 0,
+						"Warning test '{0}' should generate at least one warning.".format(d))
+					self.assertTrue(issubclass(w[-1].category, Warning),
+						"Warning test '{0}' should generate a warning of type Warning.".format(d))
+					# with catch_warnings() the behaviour changes so warnings
+					# are no longer printed to stdout.
+					# print them to stdout so users can still see what is going on.
+					for warning in w:
+						logging.warning(warning.message)
 				i += 1
 			# ignore other directories
 
