@@ -1,0 +1,5 @@
+# test chrome.locale
+
+locale checkloc-tests en-US chrome/locale/en-US/
+# same locale defined more than once - don't do this!
+locale checkloc-tests en-US chrome/locale/en-US/
