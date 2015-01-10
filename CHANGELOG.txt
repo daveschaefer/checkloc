@@ -66,9 +66,27 @@ i Refactor localization parsing and storage code into its own class
 
 1.1
 ---
-+ Verify that string substitutions inside .properties files are the same across all languages
++ Add test: verify that string substitutions inside .properties files are the same across all languages
 
 
 1.0
 ---
 Initial version
+
+Covers the following test cases:
+
+    1. No localization has extra files
+    2. No localization is missing files
+    3. Each localization has at least one key
+    4. No localization has extra keys
+    5. No localization is missing keys
+    6. No key is blank
+    7. DTD key names contain no invalid characters, including "!@#$%^&*<>[](){} ?'
+    8. DTD values contain no invalid characters, including "%<&
+    9. DTD comments contain no double hyphens --
+    10. .properties values are valid, meaning either:
+        10a) no % on a line
+        10b) double %% to escape and print a regular %
+        10c) %S or %n$S , where n is a number, for formatted string replacement.
+    11. No files contain the Byte Order Marker (BOM)
+    12. No localization has duplicate keys defined in the same .properties file
