@@ -63,7 +63,7 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 
 1. ```.properties``` keys contain no spaces
 2. No ```.properties``` value contains more than 10 unique string substitutions - either ```%S```-style, numbered ```%1$S```-style, or combined. [See References](#max10subs).  
-  (It is of course valid to re-use any ```%1$S```-style numbered substitution as many times as you want)
+  (It is of course valid to re-use any one ```%1$S```-style numbered substitution as many times as you want)
 
 ### Manifest files
 
@@ -93,6 +93,6 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 	```NS_ENSURE_ARG(aLength <= 10); // enforce 10-parameter limit```
 4. [Extensible Markup Language (XML) 1.1](http://www.w3.org/TR/xml11/#sec-entity-decl])
 5. [```chrome.manifest``` file format](https://developer.mozilla.org/en-US/docs/Chrome_Registration)
-6. [Add-on Install Manifests](https://developer.mozilla.org/en-US/Add-ons/Install_Manifests)
+6. [```install.rdf``` - Add-on Install Manifests](https://developer.mozilla.org/en-US/Add-ons/Install_Manifests)
 7. [Mozilla Localization ("L10n") Teams](https://wiki.mozilla.org/L10n:Localization_Teams)
 8. [Mozilla Locale Codes](https://wiki.mozilla.org/L10n:Locale_Codes)
