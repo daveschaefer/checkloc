@@ -1,0 +1,2 @@
+<!-- Test that entities are parsed even if one has an empty value in one locale but is present in another. -->
+<!ENTITY testOneEmptyEntity "">
