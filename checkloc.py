@@ -26,12 +26,15 @@ import logging
 import os
 import re
 import sys
+import warnings
 
 try:
 	from lxml import etree
 except ImportError:
-	logging.warning("python lxml library not found; localization tests cannot be run. Please install the python 'lxml' library to run localization tests.")
+	warnings.warn("python lxml library not found; localization tests cannot be run. Please install the python 'lxml' library to run localization tests.")
 	sys.exit(0)
+
+import localecodes
 
 
 # Attempt to version meaningfully, following semver.org:
@@ -44,6 +47,8 @@ VERSION = "1.2"
 # the en-US translation will have all files and strings created. Use it as the base.
 BASE_LOC = 'en-US'
 
+MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)')
+
 any_errors = False
 
 def _log_error(msg):
@@ -54,6 +59,15 @@ def _log_error(msg):
 
 	any_errors = True
 	logging.error(msg)
+
+def _format_warning(message, category, filename, lineno, line=None):
+	"""
+	Format a warning message and return it as a string.
+
+	Overrides the warnings module's built-in formatwarning() function
+	so we can format warnings using this module's log formatting.
+	"""
+	return message
 
 
 class LocalizationLanguage:
@@ -161,7 +175,7 @@ class LocalizationLanguage:
 			loc_files.extend(files)
 
 		logging.info("Checking files in {0}".format(self.loc_dir))
-		for file_name in files:
+		for file_name in loc_files:
 			file_path = os.path.normpath(os.path.join(self.loc_dir, file_name))
 			file_name = file_name.replace(self.LSEP, '')
 
@@ -185,15 +199,15 @@ class LocalizationLanguage:
 							if key in self.keys:
 								self._log_error("Duplicate dtd key '{0}' found in {1}".format(\
 									key, file_path))
-							elif len(entity.content) < 1:
-								logging.warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
-									key, file_path))
 							# check for invalid content
 							# lxml will already check for '%' in values when it parses the file
 							elif '<' in entity.content:
 								self._log_error("The value for '{0}' in {1} contains the invalid character '<'. This is not allowed; please remove this character.".format(\
 									key, file_path))
 							else:
+								if len(entity.content) < 1:
+									warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
+										key, file_path))
 								self.keys[key] = entity.content
 
 					except (etree.DTDParseError) as ex:
@@ -217,7 +231,7 @@ class LocalizationLanguage:
 				self._parse_properties_file(file_path)
 			else:
 				# not neccesarily a failure - there may just be extra files lying around.
-				logging.warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
+				warnings.warn("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
 
 		return self.parsing_errors
 
@@ -235,7 +249,7 @@ class LocalizationLanguage:
 			data = openfile.read()
 
 			if (len(data) < 1):
-				logging.warning("{0} does not contain any lines".format(file_path))
+				warnings.warn("{0} does not contain any lines".format(file_path))
 				return
 
 			data = re.sub(self.PROP_COMMENT, '', data)
@@ -317,7 +331,121 @@ class LocalizationLanguage:
 		return
 
 
-def validate_loc_files(loc_dir):
+def _validate_manifests(loc_dir, langs):
+	"""
+	Validate localization contents of the Mozilla extension information files:
+	chrome.manifest and install.rdf.
+	"""
+
+	plugin_dir = os.path.abspath(os.path.join(loc_dir, '../..'))
+	if not (os.path.exists(plugin_dir) and os.path.isdir(plugin_dir)):
+		_log_error("Main plugin directory {0} does not exist; cannot validate chrome.manifest. "
+			"If you wish to skip validation of chrome.manifest please specify the "
+			"--no-manifest switch when running tests.".format(plugin_dir))
+		return
+
+	manifest = os.path.join(plugin_dir, 'chrome.manifest')
+	if not (os.path.exists(manifest)):
+		_log_error("File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
+			"If you wish to skip validation of chrome.manifest please specify the "
+			"--no-manifest switch when running tests.".format(plugin_dir))
+		return
+
+	manifest_locales = {}
+	rdf_locales = {}
+
+	# parse the chrome.manfiest file and save locale data.
+	# manifest files use a simple line-based format:
+	# https://developer.mozilla.org/en-US/docs/Chrome_Registration#The_Chrome_Registry
+	#
+	# we're only worried about 'locale' lines. They look like:
+	#   locale packagename localename uri/to/files/ [flags]
+	# e.g.
+	#   locale extension-name pl chrome/locale/pl/
+	#
+	# TODO: We could ad a test to check that the file location exists
+	with open(manifest, 'r') as m:
+		lines = m.readlines()
+		i = 1 # save the line number to help users troubleshoot any problems
+		for line in lines:
+			match = MANIFEST_LOCALE_LINE.match(line)
+			if match:
+				locale = match.groups(1)[0]
+				if locale not in manifest_locales:
+					manifest_locales[locale] = i
+				else:
+					_log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
+						"Each locale should only be defined once.".format(locale))
+			i += 1
+
+
+	# also parse install.rdf
+	install_rdf = os.path.abspath(os.path.join(plugin_dir, 'install.rdf'))
+	if not (os.path.exists(install_rdf)):
+		_log_error("File install.rdf does not exist in {0} ; cannot validate. "
+			"If you wish to skip validation please specify the "
+			"--no-manifest switch when running tests.".format(plugin_dir))
+		return
+
+	try:
+		xml = etree.parse(install_rdf)
+		root = xml.getroot()
+		for locale in root.findall('.//em:locale', root.nsmap):
+			loc = locale.text
+			if loc not in rdf_locales:
+				rdf_locales[loc] = True
+			else:
+				_log_error("Locale '{0}' is defined more than once inside install.rdf. "
+					"Each locale should only be defined once.".format(loc))
+	except etree.XMLSyntaxError as ex:
+		_log_error("Could not parse {0}: {1}".format(install_rdf, ex))
+
+
+	# check every chrome.manifest entry to make sure a locale folder exists
+	for locale in manifest_locales:
+		locale_path = os.path.join(loc_dir, locale)
+		if not (os.path.exists(locale_path)):
+			_log_error("Locale folder '{0}' is specified in chrome.manifest "
+				"line {1}, but {2} does not exist!".format(
+					locale, manifest_locales[locale], locale_path))
+		elif not (os.path.isdir(locale_path)):
+			_log_error("Locale folder '{0}' is specified in chrome.manifest "
+				"line {1}, but {2} is not a folder!".format(
+					locale, manifest_locales[locale], locale_path))
+
+		if locale not in localecodes.MOZILLA_LOCALE_CODES:
+			warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+				locale))
+
+	# check every install.rdf entry to make sure a locale folder exists
+	for locale in rdf_locales:
+		locale_path = os.path.join(loc_dir, locale)
+		if not (os.path.exists(locale_path)):
+			warnings.warn("Locale folder '{0}' is specified in install.rdf "
+				"but {1} does not exist!".format(
+					locale, locale_path))
+		elif not (os.path.isdir(locale_path)):
+			warnings.warn("Locale folder '{0}' is specified in install.rdf "
+				"but {1} is not a folder!".format(
+					locale, locale_path))
+
+		if locale not in localecodes.MOZILLA_LOCALE_CODES:
+			warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+				locale))
+
+	# check every locale folder to ensure both
+	# a manifest entry and an install.rdf entry exist
+	for lang in langs:
+		if (lang not in manifest_locales):
+			_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
+				"exists in the chrome.manifest.".format(lang, loc_dir))
+		if (lang not in rdf_locales):
+			warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
+				"exists in install.rdf.".format(lang, loc_dir))
+
+
+
+def validate_loc_files(loc_dir, parse_manifests=True):
 	"""
 	Validate localization contents inside the given base directory.
 	Return True if there were any errors and False otherwise.
@@ -353,6 +481,9 @@ def validate_loc_files(loc_dir):
 		_log_error("Base language folder '{0}' was not found in {1}".format(\
 			BASE_LOC, loc_dir))
 		return True
+
+	if (parse_manifests):
+		_validate_manifests(loc_dir, langs)
 
 	baseline = LocalizationLanguage(loc_dir, BASE_LOC)
 	parse_errors = baseline.get_loc_keys()
@@ -421,6 +552,11 @@ if __name__ == '__main__':
 	verbosity_group.add_argument('--quiet', '-q', default=False, action='store_true',
 			help="Quiet mode. Don't print much, not even error info.")
 
+	parser.add_argument('--no-manifest', '--nm', default=False, action='store_true',
+			help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
+				"Mainly intended to allow easier unit-testing of checkloc itself; "
+				"you should usually *NOT* use this flag.")
+
 	args = parser.parse_args()
 
 	loglevel = logging.WARNING
@@ -430,7 +566,16 @@ if __name__ == '__main__':
 		loglevel = logging.CRITICAL
 
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
-	errors = validate_loc_files(args.loc_dir)
+	# send warning messages through our logging system
+	# with the desired formatting
+	logging.captureWarnings(True)
+	warnings.formatwarning=_format_warning
+
+	parse_manifests = True
+	if (args.no_manifest):
+		parse_manifests = False
+
+	errors = validate_loc_files(args.loc_dir, parse_manifests=parse_manifests)
 	if (errors):
 		sys.exit(1)
 	else:

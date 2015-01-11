@@ -28,6 +28,8 @@ Or run ```>python checkloc/checkloc.py --help```
 
 ## Current test cases
 
+Test cases marked with *[w]* generate a warning; all other cases generate errors.
+
 ### Basic validation and syntax
 
 1. No localization has extra files
@@ -39,12 +41,14 @@ Or run ```>python checkloc/checkloc.py --help```
 7. DTD keys contain no invalid characters, including ```"!@#$%^&*<>[](){} ?'```
 8. DTD values contain no invalid characters, including ```"%<&```  
 	(you can use the [HTML character entity codes](https://en.wikipedia.org/wiki/List_of_XML_and_HTML_character_entity_references) ```&quot;```, ```&#37;```, ```&lt;```, and ```&amp;``` if you need to use those characters inside a DTD value)
-9. DTD comments contain no double hyphens ```--```
-10. ```.properties``` values are valid, meaning either:
+9. *[w]* DTD values are not empty: ```""``` or ```''```  
+  (using empty DTD values is valid, and your extension will build and run normally. No string will be displayed, however, so this may not be what you want)
+10. DTD comments contain no double hyphens ```--```
+11. ```.properties``` values are valid, meaning either:
   1. no ```%``` on a line
   2. double ```%%``` to escape and print a regular ```%```
   3. ```%S``` or ```%n$S``` , where ```n``` is a number, for formatted string replacement.
-11. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
+12. No files contain the [Byte Order Marker (BOM)](https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Escape_non-ASCII_Characters)
 
 ### Language consistency
 
@@ -59,14 +63,19 @@ Or run ```>python checkloc/checkloc.py --help```
 
 1. ```.properties``` keys contain no spaces
 2. No ```.properties``` value contains more than 10 unique string substitutions - either ```%S```-style, numbered ```%1$S```-style, or combined. [See References](#max10subs).  
-  (It is of course valid to re-use any ```%1$S```-style numbered substitution as many times as you want)
+  (It is of course valid to re-use any one ```%1$S```-style numbered substitution as many times as you want)
 
-### Warnings
+### Manifest files
 
-The following cases generate warnings, but not errors.
-
-1. Empty DTD values: ```""``` or ```''```  
-Using empty DTD values is valid, and your extension will build and run normally. No string will be displayed, however, so this may not be what you want.
+1. All ```locale``` entries in ```chrome.manifest``` have a locale folder in the correct location on disk
+2. All locale folders on disk have an entry in ```chrome.manifest```
+3. No ```locale``` in ```chrome.manifest``` is defined more than once
+4. *[w]* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
+5. ```install.rdf``` contains only valid XML
+6. *[w]* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
+7. *[w]* All locale folders on disk have an entry in ```install.rdf```
+8. No ```<em:locale>``` in ```install.rdf``` is defined more than once
+9. *[w]* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
 
 
 ## Possible future test cases
@@ -83,3 +92,7 @@ Using empty DTD values is valid, and your extension will build and run normally.
 	```// ...```  
 	```NS_ENSURE_ARG(aLength <= 10); // enforce 10-parameter limit```
 4. [Extensible Markup Language (XML) 1.1](http://www.w3.org/TR/xml11/#sec-entity-decl])
+5. [```chrome.manifest``` file format](https://developer.mozilla.org/en-US/docs/Chrome_Registration)
+6. [```install.rdf``` - Add-on Install Manifests](https://developer.mozilla.org/en-US/Add-ons/Install_Manifests)
+7. [Mozilla Localization ("L10n") Teams](https://wiki.mozilla.org/L10n:Localization_Teams)
+8. [Mozilla Locale Codes](https://wiki.mozilla.org/L10n:Locale_Codes)

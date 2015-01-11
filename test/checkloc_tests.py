@@ -22,6 +22,7 @@ import logging
 import os
 import sys
 import unittest
+import warnings
 
 # prepend parent directory so we can import the checkloc module
 sys.path.append(
@@ -37,6 +38,18 @@ VALID_DATA_NAME = 'valid'
 # to signify it contains invalid data that should be caught when parsed
 INVALID_DATA_NAME = 'invalid'
 
+# check that warnings are generated
+WARNING_NAME = 'warn'
+
+# to run tests that include parsing the manifest files
+# chrome.manifest and install.rdf
+# start the folder with these prefixes
+MANIFEST_NAME = 'manifest_'
+MANIFEST_INVALID_NAME = MANIFEST_NAME + INVALID_DATA_NAME
+MANIFEST_VALID_NAME = MANIFEST_NAME + VALID_DATA_NAME
+MANIFEST_WARNING_NAME = MANIFEST_NAME + WARNING_NAME
+LOCALE_PATH = 'chrome/locale'
+
 
 class TestChecklocModule(unittest.TestCase):
 	"""
@@ -49,38 +62,97 @@ class TestChecklocModule(unittest.TestCase):
 		for d in dirs:
 			if d.startswith(VALID_DATA_NAME):
 				print "-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d)
-				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
 				self.assertFalse(errors)
 				i += 1
 			elif d.startswith(INVALID_DATA_NAME):
 				print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
-				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d))
+				errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
 				self.assertTrue(errors)
+				i += 1
+			elif d.startswith(WARNING_NAME):
+				print "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning...".format(i, d)
+				# capture all warnings so we can verify that they happen
+				with warnings.catch_warnings(record=True) as w:
+					errors = validate_loc_files(os.path.join(TEST_DATA_DIR, d), parse_manifests=False)
+					self.assertFalse(errors,
+						"Warning test '{0}' should not generate any errors.".format(d))
+					self.assertTrue(len(w) > 0,
+						"Warning test '{0}' should generate at least one warning.".format(d))
+					self.assertTrue(issubclass(w[-1].category, Warning),
+						"Warning test '{0}' should generate a warning of type Warning.".format(d))
+					# with catch_warnings() the behaviour changes so warnings
+					# are no longer printed to stdout.
+					# print them to stdout so users can still see what is going on.
+					for warning in w:
+						logging.warning(warning.message)
+				i += 1
+			elif d.startswith(MANIFEST_VALID_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d)
+				errors = validate_loc_files(target_dir, parse_manifests=True)
+				self.assertFalse(errors,
+					"Valid manifest test '{0}' should not generate any errors.".format(d))
+				i += 1
+			elif d.startswith(MANIFEST_INVALID_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d)
+				errors = validate_loc_files(target_dir, parse_manifests=True)
+				self.assertTrue(errors,
+					"Invalid manifest test '{0}' should generate at least one error.".format(d))
+				i += 1
+			elif d.startswith(MANIFEST_WARNING_NAME):
+				target_dir = os.path.join(TEST_DATA_DIR, d, LOCALE_PATH)
+				print "-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning...".format(i, d)
+				# capture all warnings so we can verify that they happen
+				with warnings.catch_warnings(record=True) as w:
+					errors = validate_loc_files(target_dir, parse_manifests=True)
+					self.assertFalse(errors,
+						"Warning test '{0}' should not generate any errors.".format(d))
+					self.assertTrue(len(w) > 0,
+						"Warning test '{0}' should generate at least one warning.".format(d))
+					self.assertTrue(issubclass(w[-1].category, Warning),
+						"Warning test '{0}' should generate a warning of type Warning.".format(d))
+					# with catch_warnings() the behaviour changes so warnings
+					# are no longer printed to stdout.
+					# print them to stdout so users can still see what is going on.
+					for warning in w:
+						logging.warning(warning.message)
 				i += 1
 			# ignore other directories
 
 	def test_nonexistent_directories_raise_an_error(self):
 		non_existent_dir = os.path.join(TEST_DATA_DIR, 'null_empty')
 		self.assertFalse(os.path.exists(non_existent_dir), "Test setup: directory {0} should not exist".format(non_existent_dir))
-		errors = validate_loc_files(non_existent_dir)
+		errors = validate_loc_files(non_existent_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_passing_non_directory_raises_an_error(self):
 		file_name = os.path.join(TEST_DATA_DIR, 'test_file.txt')
 		self.assertTrue(os.path.exists(file_name), "Test setup: file {0} exists".format(file_name))
 		self.assertFalse(os.path.isdir(file_name), "Test setup: file {0} is not a directory".format(file_name))
-		errors = validate_loc_files(file_name)
+		errors = validate_loc_files(file_name, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_finding_no_language_folders_raises_an_error(self):
 		empty_dir = os.path.join(TEST_DATA_DIR, 'other_no_lang_folders')
 		self.assertTrue(os.path.exists(empty_dir), "Test setup: directory {0} should exist".format(empty_dir))
 		self.assertTrue(os.path.isdir(empty_dir), "Test setup: {0} is a directory".format(empty_dir))
-		errors = validate_loc_files(empty_dir)
+		errors = validate_loc_files(empty_dir, parse_manifests=False)
 		self.assertTrue(errors)
 
 	def test_finding_no_baseline_folder_raises_an_error(self):
 		base_dir = os.path.join(TEST_DATA_DIR, 'other_no_baseline')
+		self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
+		self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
+		errors = validate_loc_files(base_dir, parse_manifests=False)
+		self.assertTrue(errors)
+
+	def test_finding_no_loc_data_raises_an_error(self):
+		# by this we mean: no Mozilla-style localization data of any kind.
+		# the folder could contain anything, but it's not in the format we're expecting.
+		# the script should still fail gracefully in this case.
+		base_dir = TEST_DATA_DIR
 		self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
 		self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
 		errors = validate_loc_files(base_dir)

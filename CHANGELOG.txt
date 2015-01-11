@@ -12,6 +12,25 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+1.3
+---
++ Add tests to validate the contents of chrome.manifest and install.rdf:
+	+ Check every chrome.manifest entry to make sure a corresponding locale folder exists
+	+ Check every locale folder to ensure a corresponding entry exists in chrome.manifest
+	+ Check that chrome.manifest locale codes exist in the list of possible locale codes
+	+ Check that no locales are defined more than once inside chrome.manifest
+	+ Check that install.rdf is valid XML
+	+ Check every install.rdf entry to make sure a corresponding locale folder exists
+	+ Check every locale folder to ensure a corresponding entry exists in install.rdf
+	+ Check that install.rdf locale codes exist in the list of possible locale codes
+	+ Check that no locales are defined more than once inside install.rdf
++ Add test case to fail gracefully if run against a folder that does not contain localization data
++ Add ability to test for warnings inside self-checking unit tests
++ Add test case to verify warnings are generated when blank string DTD values are found
+* Fix incorrect variable usage inside LocalizationLanguage.get_loc_keys()
+* Fix bug: still capture DTD entities even if they have a blank value
+
+
 1.2
 ----
 * Add basic unit tests to check parsing and validation
@@ -47,9 +66,27 @@ i Refactor localization parsing and storage code into its own class
 
 1.1
 ---
-+ Verify that string substitutions inside .properties files are the same across all languages
++ Add test: verify that string substitutions inside .properties files are the same across all languages
 
 
 1.0
 ---
 Initial version
+
+Covers the following test cases:
+
+    1. No localization has extra files
+    2. No localization is missing files
+    3. Each localization has at least one key
+    4. No localization has extra keys
+    5. No localization is missing keys
+    6. No key is blank
+    7. DTD key names contain no invalid characters, including "!@#$%^&*<>[](){} ?'
+    8. DTD values contain no invalid characters, including "%<&
+    9. DTD comments contain no double hyphens --
+    10. .properties values are valid, meaning either:
+        10a) no % on a line
+        10b) double %% to escape and print a regular %
+        10c) %S or %n$S , where n is a number, for formatted string replacement.
+    11. No files contain the Byte Order Marker (BOM)
+    12. No localization has duplicate keys defined in the same .properties file

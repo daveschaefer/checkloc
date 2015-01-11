@@ -1,0 +1,5 @@
+# test chrome.locale
+
+locale checkloc-tests en-US chrome/locale/en-US/
+
+# test for an error if 'fr' locale doesn't exist in this file

@@ -1,0 +1,4 @@
+# test chrome.locale
+
+locale checkloc-tests en-US chrome/locale/en-US/
+locale checkloc-tests fr chrome/locale/fr/
