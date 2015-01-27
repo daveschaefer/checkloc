@@ -261,3 +261,7 @@ MOZILLA_LOCALE_CODES = {
 	'zty-MX': True,
 	'zu': True
 }
+
+if __name__ == "__main__":
+	pass
+
