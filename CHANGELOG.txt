@@ -12,6 +12,14 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+1.3.1
+-----
+* Add python shebang line for better platform portability
+* Replace list of locale groups with better list of locale codes
+	Initial list taken from https://svn.mozilla.org/libs/product-details/json/languages.json
+* Add more locale codes found in use by extensions
+
+
 1.3
 ---
 + Add tests to validate the contents of chrome.manifest and install.rdf:
