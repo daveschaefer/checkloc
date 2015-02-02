@@ -67,15 +67,17 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 
 ### Manifest files
 
-1. All ```locale``` entries in ```chrome.manifest``` have a locale folder in the correct location on disk
-2. All locale folders on disk have an entry in ```chrome.manifest```
-3. No ```locale``` in ```chrome.manifest``` is defined more than once
-4. *[w]* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
-5. ```install.rdf``` contains only valid XML
-6. *[w]* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
-7. *[w]* All locale folders on disk have an entry in ```install.rdf```
-8. No ```<em:locale>``` in ```install.rdf``` is defined more than once
-9. *[w]* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
+1. All ```locale``` lines in ```chrome.manifest``` are valid registration entries (i.e. syntax is valid)
+2. All ```locale``` entries in ```chrome.manifest``` have a locale folder in the correct location on disk
+3. All locale folders on disk have an entry in ```chrome.manifest```
+4. No ```locale``` in ```chrome.manifest``` is defined more than once
+5. *[w]* All ```locale``` entries in ```chrome.manifest``` exist in the list of known Mozilla locale codes
+6. ```install.rdf``` contains only valid XML
+7. *[w]* All ```<em:locale>``` entries in ```install.rdf``` have an entry in ```chrome.manifest```
+8. *[w]* All ```<em:locale>``` entries in ```install.rdf``` have a locale folder in the correct location on disk
+9. *[w]* All locale folders on disk have an entry in ```install.rdf```
+10. No ```<em:locale>``` in ```install.rdf``` is defined more than once
+11. *[w]* All ```<em:locale>``` entries in ```install.rdf``` exist in the list of known Mozilla locale codes
 
 
 ## Possible future test cases
