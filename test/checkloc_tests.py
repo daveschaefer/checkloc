@@ -174,4 +174,7 @@ if __name__ == '__main__':
 		loglevel = logging.CRITICAL
 
 	logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
+	# make sure all warnings are always raised; never suppress any.
+	# this ensures we can always detect correct warning behaviour.
+	warnings.simplefilter('always', UserWarning)
 	unittest.main()
