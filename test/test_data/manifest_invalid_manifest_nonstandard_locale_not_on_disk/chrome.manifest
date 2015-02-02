@@ -1,0 +1,4 @@
+# test chrome.locale
+
+# add a locale entry for a non-standard location that is not on disk
+locale checkloc-tests en-US extname/different/subfolder/en-US/
