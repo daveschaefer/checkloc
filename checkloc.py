@@ -52,6 +52,7 @@ MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
 
+
 def _log_error(msg):
 	"""Log an error message."""
 	# this function wraps setting the global error flag
@@ -331,131 +332,176 @@ class LocalizationLanguage:
 
 		return
 
-
-def _validate_manifests(loc_dir, langs):
+class ManifestSet:
 	"""
-	Validate localization contents of the Mozilla extension information files:
-	chrome.manifest and install.rdf.
-	Return an array of locale base folders.
+	Encapsulate all of the parsing, storage, and logic necessary
+	to create, hold, and work with one particular set of Mozilla extension
+	manifest files (chrome.manifest and install.rdf).
 	"""
 
-	loc_folders = {}
+	def __init__(self, manifest_dir):
+		"""
+		Create a new ManifestSet.
+		Argument: path to the directory that contains chrome.manifest
+		"""
+		self.manifest_dir = manifest_dir
+		self.manifests_parsed = False
 
-	# TODO: have to make sure it fails for the correct reason
-	# TODO: update the --no-manifest switch text here
-	plugin_dir = loc_dir
-	if not (os.path.exists(plugin_dir) and os.path.isdir(plugin_dir)):
-		_log_error("Main plugin directory {0} does not exist; cannot validate chrome.manifest. "
-			"If you wish to skip validation of chrome.manifest please specify the "
-			"--no-manifest switch when running tests.".format(plugin_dir))
-		return
+	def validate_manifests(self):
+		"""
+		Validate localization contents of the Mozilla extension information files:
+		chrome.manifest and install.rdf.
+		"""
+		self.loc_base_dirs = {}
+		self.manifest_paths = {}
+		self.manifest_lines = {}
+		self.rdf_locs = {}
 
-	manifest = os.path.join(plugin_dir, 'chrome.manifest')
-	if not (os.path.exists(manifest)):
-		_log_error("File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
-			"If you wish to skip validation of chrome.manifest please specify the "
-			"--no-manifest switch when running tests.".format(plugin_dir))
-		return
+		if not (os.path.exists(self.manifest_dir) and os.path.isdir(self.manifest_dir)):
+			_log_error("Main plugin directory {0} does not exist; cannot validate chrome.manifest. "
+				"If you wish to skip validation of chrome.manifest please specify the "
+				"--locales-only switch when running tests.".format(self.manifest_dir))
+			return
 
-	manifest_locales = {}
-	rdf_locales = {}
+		manifest = os.path.join(self.manifest_dir, 'chrome.manifest')
+		if not (os.path.exists(manifest)):
+			_log_error("File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
+				"If you wish to skip validation of chrome.manifest please specify the "
+				"--locales-only switch when running tests.".format(self.manifest_dir))
+			return
 
-	# parse the chrome.manfiest file and save locale data.
-	# manifest files use a simple line-based format:
-	# https://developer.mozilla.org/en-US/docs/Chrome_Registration#The_Chrome_Registry
-	#
-	# we're only worried about 'locale' lines. They look like:
-	#   locale packagename localename uri/to/files/ [flags]
-	# e.g.
-	#   locale extension-name pl chrome/locale/pl/
-	#
-	# TODO: We could ad a test to check that the file location exists
-	with open(manifest, 'r') as m:
-		lines = m.readlines()
-		i = 1 # save the line number to help users troubleshoot any problems
-		for line in lines:
-			match = MANIFEST_LOCALE_LINE.match(line)
-			if match:
-				locale = match.groups(1)[0]
-				locale_subdir = match.group(2)
-				# go one dir up to get the main locale directory
-				locale_absdir = os.path.abspath(os.path.join(loc_dir, locale_subdir, '..'))
-				if (locale_absdir not in loc_folders):
-					# TODO: save these so install.rdf can find its contents
-					loc_folders[locale_absdir] = True
-				if locale_subdir not in manifest_locales:
-					manifest_locales[locale_subdir] = i
+		# parse the chrome.manfiest file and save locale data.
+		# manifest files use a simple line-based format:
+		# https://developer.mozilla.org/en-US/docs/Chrome_Registration#The_Chrome_Registry
+		#
+		# we're only worried about 'locale' lines. They look like:
+		#   locale packagename localename uri/to/files/ [flags]
+		# e.g.
+		#   locale extension-name pl chrome/locale/pl/
+		#
+		with open(manifest, 'r') as m:
+			lines = m.readlines()
+			i = 1 # save the line number to help users troubleshoot any problems
+			for line in lines:
+				match = MANIFEST_LOCALE_LINE.match(line)
+				if match:
+					locale = match.groups(1)[0]
+					locale_subdir = match.group(2)
+					# go one dir up to get the main locale directory
+					base_dir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir, '..'))
+					locale_absdir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir))
+
+					self.loc_base_dirs[base_dir] = True
+
+					if (locale not in self.manifest_paths):
+						self.manifest_paths[locale] = locale_absdir
+					if locale not in self.manifest_lines:
+						self.manifest_lines[locale] = i
+					else:
+						_log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
+							"Each locale should only be defined once.".format(locale))
+				i += 1
+
+
+		# also parse install.rdf
+		install_rdf = os.path.abspath(os.path.join(self.manifest_dir, 'install.rdf'))
+		if not (os.path.exists(install_rdf)):
+			_log_error("File install.rdf does not exist in {0} ; cannot validate. "
+				"If you wish to skip validation please specify the "
+				"--locales-only switch when running tests.".format(self.manifest_dir))
+			return
+
+		try:
+			xml = etree.parse(install_rdf)
+			root = xml.getroot()
+			for locale in root.findall('.//em:locale', root.nsmap):
+				loc = locale.text
+				if loc not in self.rdf_locs:
+					self.rdf_locs[loc] = True
 				else:
-					_log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
-						"Each locale should only be defined once.".format(locale_subdir))
-			i += 1
+					_log_error("Locale '{0}' is defined more than once inside install.rdf. "
+						"Each locale should only be defined once.".format(loc))
+		except etree.XMLSyntaxError as ex:
+			_log_error("Could not parse {0}: {1}".format(install_rdf, ex))
 
 
-	# also parse install.rdf
-	install_rdf = os.path.abspath(os.path.join(plugin_dir, 'install.rdf'))
-	if not (os.path.exists(install_rdf)):
-		_log_error("File install.rdf does not exist in {0} ; cannot validate. "
-			"If you wish to skip validation please specify the "
-			"--no-manifest switch when running tests.".format(plugin_dir))
-		return
+		# check every chrome.manifest entry to make sure a locale folder exists
+		for locale in self.manifest_paths:
+			locale_path = self.manifest_paths[locale]
+			if not (os.path.exists(locale_path)):
+				_log_error("Locale folder '{0}' is specified in chrome.manifest "
+					"line {1}, but {2} does not exist!".format(
+						locale, self.manifest_lines[locale], locale_path))
+			elif not (os.path.isdir(locale_path)):
+				_log_error("Locale folder '{0}' is specified in chrome.manifest "
+					"line {1}, but {2} is not a folder!".format(
+						locale, self.manifest_lines[locale], locale_path))
 
-	try:
-		xml = etree.parse(install_rdf)
-		root = xml.getroot()
-		for locale in root.findall('.//em:locale', root.nsmap):
-			loc = locale.text
-			if loc not in rdf_locales:
-				rdf_locales[loc] = True
+			# if an entry exists in chrome.manifest then it must exist on disk
+			# or we will raise an error.
+			# if it exists on disk but isn't inside install.rdf we'll catch that below
+			# when we compare existing folders to the contents of manifest files.
+			# thus we do *not* need to check here whether locales in chrome.manifest
+			# also exist inside install.rdf.
+
+			if locale not in localecodes.MOZILLA_LOCALE_CODES:
+				warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale))
+
+		# check every install.rdf entry to make sure a locale folder exists
+		for locale in self.rdf_locs:
+			if (locale not in self.manifest_paths):
+				warnings.warn("Locale '{0}' is specified in install.rdf "
+					"but is not specified in chrome.manifest.".format(locale))
 			else:
-				_log_error("Locale '{0}' is defined more than once inside install.rdf. "
-					"Each locale should only be defined once.".format(loc))
-	except etree.XMLSyntaxError as ex:
-		_log_error("Could not parse {0}: {1}".format(install_rdf, ex))
+				locale_path = self.manifest_paths[locale]
+				if not (os.path.exists(locale_path)):
+					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+						"line {1}, but {2} does not exist!".format(
+							locale, self.manifest_lines[locale], locale_path))
+				elif not (os.path.isdir(locale_path)):
+					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+						"line {1}, but {2} is not a folder!".format(
+							locale, self.manifest_lines[locale], locale_path))
+
+			if locale not in localecodes.MOZILLA_LOCALE_CODES:
+				warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale))
 
 
-	# check every chrome.manifest entry to make sure a locale folder exists
-	for locale in manifest_locales:
-		locale_path = os.path.join(loc_dir, locale)
-		if not (os.path.exists(locale_path)):
-			_log_error("Locale folder '{0}' is specified in chrome.manifest "
-				"line {1}, but {2} does not exist!".format(
-					locale, manifest_locales[locale], locale_path))
-		elif not (os.path.isdir(locale_path)):
-			_log_error("Locale folder '{0}' is specified in chrome.manifest "
-				"line {1}, but {2} is not a folder!".format(
-					locale, manifest_locales[locale], locale_path))
+		# now calculate the locale subdirectories
+		langs = {}
+		for ld in self.loc_base_dirs:
+			for (root, dirs, files) in os.walk(ld):
+				for d in dirs:
+					langs[d] = os.path.join(ld, d)
 
-		if locale not in localecodes.MOZILLA_LOCALE_CODES:
-			warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-				locale))
+		# check every locale folder to ensure both
+		# a manifest entry and an install.rdf entry exist.
+		for lang in langs:
+			# give a more accurate sub-folder location, if we are able
+			dir_path = self.manifest_dir
+			if lang in self.manifest_paths:
+				dir_path = os.path.abspath(os.path.join(self.manifest_paths[lang], '..'))
 
-	# check every install.rdf entry to make sure a locale folder exists
-	for locale in rdf_locales:
-		locale_path = os.path.join(loc_dir, locale)
-		if not (os.path.exists(locale_path)):
-			warnings.warn("Locale folder '{0}' is specified in install.rdf "
-				"but {1} does not exist!".format(
-					locale, locale_path))
-		elif not (os.path.isdir(locale_path)):
-			warnings.warn("Locale folder '{0}' is specified in install.rdf "
-				"but {1} is not a folder!".format(
-					locale, locale_path))
+			if (lang not in self.manifest_paths):
+				_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
+					"exists in the chrome.manifest.".format(lang, dir_path))
+			if (lang not in self.rdf_locs):
+				warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
+					"exists in install.rdf.".format(lang, dir_path))
 
-		if locale not in localecodes.MOZILLA_LOCALE_CODES:
-			warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-				locale))
+		self.manifests_parsed = True
 
-	# check every locale folder to ensure both
-	# a manifest entry and an install.rdf entry exist
-	for lang in langs:
-		if (lang not in manifest_locales):
-			_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
-				"exists in the chrome.manifest.".format(lang, loc_dir))
-		if (lang not in rdf_locales):
-			warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
-				"exists in install.rdf.".format(lang, loc_dir))
+	def get_loc_base_dirs(self):
+		"""
+		Return a list of localization base directories
+		found in the manifest files.
+		"""
+		if not self.manifests_parsed:
+			self.validate_manifests()
 
-	return loc_folders.keys()
+		return self.loc_base_dirs.keys()
 
 
 
@@ -482,14 +528,15 @@ def validate_loc_files(manifest_dir, locales_only=False):
 		return True
 	logging.info("{0} is a directory.".format(manifest_dir))
 
+	ms = ManifestSet(manifest_dir)
+
 
 	loc_dirs = []
 	if (locales_only):
 		loc_dirs.append(manifest_dir) # script should be pointed to main locale folder instead
 	else:
-		dirs = _validate_manifests(manifest_dir, langs)
-		if dirs:
-			loc_dirs.extend(dirs)
+		ms.validate_manifests()
+		loc_dirs.extend(ms.get_loc_base_dirs())
 
 	if not loc_dirs:
 		_log_error("No localization directories found in {0}".format(manifest_dir))
@@ -509,6 +556,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 		_log_error("Base language folder '{0}' was not found in {1}".format(\
 			BASE_LOC, loc_dirs))
 		return True
+
 
 	baseline = LocalizationLanguage(langs[BASE_LOC], BASE_LOC)
 	parse_errors = baseline.get_loc_keys()
