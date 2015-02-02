@@ -48,6 +48,9 @@ VERSION = "2.0a"
 # the en-US translation will have all files and strings created. Use it as the base.
 BASE_LOC = 'en-US'
 
+# start of string used to register locale packages - see
+# https://developer.mozilla.org/en-US/docs/Chrome_Registration#locale
+MANIFEST_LOCALE_START = 'locale'
 MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
@@ -383,23 +386,27 @@ class ManifestSet:
 			lines = m.readlines()
 			i = 1 # save the line number to help users troubleshoot any problems
 			for line in lines:
-				match = MANIFEST_LOCALE_LINE.match(line)
-				if match:
-					locale = match.groups(1)[0]
-					locale_subdir = match.group(2)
-					# go one dir up to get the main locale directory
-					base_dir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir, '..'))
-					locale_absdir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir))
+				if line.startswith(MANIFEST_LOCALE_START):
+					match = MANIFEST_LOCALE_LINE.match(line)
+					if match:
+						locale = match.groups(1)[0]
+						locale_subdir = match.group(2)
+						# go one dir up to get the main locale directory
+						base_dir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir, '..'))
+						locale_absdir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir))
 
-					self.loc_base_dirs[base_dir] = True
+						self.loc_base_dirs[base_dir] = True
 
-					if (locale not in self.manifest_paths):
-						self.manifest_paths[locale] = locale_absdir
-					if locale not in self.manifest_lines:
-						self.manifest_lines[locale] = i
+						if (locale not in self.manifest_paths):
+							self.manifest_paths[locale] = locale_absdir
+						if locale not in self.manifest_lines:
+							self.manifest_lines[locale] = i
+						else:
+							_log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
+								"Each locale should only be defined once.".format(locale))
 					else:
-						_log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
-							"Each locale should only be defined once.".format(locale))
+						_log_error("Invalid locale line found in chrome.manifest on line {0}:\n  {1}".format(
+							i, line))
 				i += 1
 
 
