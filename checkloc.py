@@ -62,34 +62,26 @@ def _log_error(msg, lang=None):
 	Log an error message.
 	If 'lang' is specified, the error was found inside the data for that language.
 	"""
-	# this function wraps setting the global error flag
-	# to keep all error code in one place
-	global any_errors
-
-	any_errors = True
-	if not lang:
-		lang = "Main"
-
-	msg_out = "({0}) {1}".format(lang, msg)
-
-	if (args.group_by_language):
-		if lang not in messages_by_language:
-			messages_by_language[lang] = []
-
-		# appending as lambda functionss allows us to combine error and warning messages
-		# and not have to re-calculate what to do with them
-		# or where they should be sent.
-		messages_by_language[lang].append(
-			lambda: logging.error(msg_out))
-	else:
-		logging.error(msg_out)
+	_log_message(msg, lang, logging.error)
 
 def _log_warning(msg, lang=None):
 	"""
 	Log a warning message.
 	If 'lang' is specified, the warning was found inside the data for that language.
 	"""
-	# TODO: don't repeat code
+	_log_message(msg, lang, warnings.warn)
+
+def _log_message(msg, lang, log_func):
+	"""
+	Log a message to the appropriate place via log_func().
+	"""
+	# this function wraps setting the global error flag
+	# to keep all error code in one place
+	global any_errors
+
+	if log_func == logging.error:
+		any_errors = True
+
 	if not lang:
 		lang = "Main"
 
@@ -98,14 +90,14 @@ def _log_warning(msg, lang=None):
 	if (args.group_by_language):
 		if lang not in messages_by_language:
 			messages_by_language[lang] = []
+
 		# appending as lambda functionss allows us to combine error and warning messages
 		# and not have to re-calculate what to do with them
 		# or where they should be sent.
 		messages_by_language[lang].append(
-			lambda: warnings.warn(msg_out))
-
+			lambda: log_func(msg_out))
 	else:
-		warnings.warn(msg_out)
+		log_func(msg_out)
 
 def _format_warning(message, category, filename, lineno, line=None):
 	"""
