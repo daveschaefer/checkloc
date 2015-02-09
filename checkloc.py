@@ -56,14 +56,21 @@ MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 any_errors = False
 
 
-def _log_error(msg):
-	"""Log an error message."""
+def _log_error(msg, lang=None):
+	"""
+	Log an error message.
+	If 'lang' is specified, the error was found inside the data for that language.
+	"""
 	# this function wraps setting the global error flag
 	# to keep all error code in one place
 	global any_errors
 
 	any_errors = True
-	logging.error(msg)
+	if not lang:
+		lang = "Main"
+
+	msg_out = "({0}) {1}".format(lang, msg)
+	logging.error(msg_out)
 
 def _format_warning(message, category, filename, lineno, line=None):
 	"""
@@ -143,7 +150,7 @@ class LocalizationLanguage:
 		# this function wraps setting the parsing error flag
 		# to keep all error code in one place
 		self.parsing_errors = True
-		logging.error(msg)
+		_log_error(msg, self.name)
 
 
 	def _extract_first_dtd_parse_error_info(self, err):
@@ -438,11 +445,11 @@ class ManifestSet:
 			if not (os.path.exists(locale_path)):
 				_log_error("Locale folder '{0}' is specified in chrome.manifest "
 					"line {1}, but {2} does not exist!".format(
-						locale, self.manifest_lines[locale], locale_path))
+						locale, self.manifest_lines[locale], locale_path), locale)
 			elif not (os.path.isdir(locale_path)):
 				_log_error("Locale folder '{0}' is specified in chrome.manifest "
 					"line {1}, but {2} is not a folder!".format(
-						locale, self.manifest_lines[locale], locale_path))
+						locale, self.manifest_lines[locale], locale_path), locale)
 
 			# if an entry exists in chrome.manifest then it must exist on disk
 			# or we will raise an error.
@@ -493,7 +500,7 @@ class ManifestSet:
 
 			if (lang not in self.manifest_paths):
 				_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
-					"exists in the chrome.manifest.".format(lang, dir_path))
+					"exists in the chrome.manifest.".format(lang, dir_path), lang)
 			if (lang not in self.rdf_locs):
 				warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
 					"exists in install.rdf.".format(lang, dir_path))
@@ -589,34 +596,34 @@ def validate_loc_files(manifest_dir, locales_only=False):
 		for key in loc.keys:
 			if (key not in baseline.keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, loc.name, baseline.name))
+					key, loc.name, baseline.name), lang)
 
 		for key in baseline.keys:
 			if (key not in loc.keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, baseline.name, loc.name))
+					key, baseline.name, loc.name), lang)
 
 		# make sure .properties string substitutions match
 		# keys that don't exist in one loc will already have been caught above
 		for key in loc.subs:
 			if key not in baseline.subs:
 				_log_error("String substitution for key '{0}' found in '{1}' but not in baseline {2}!".format(\
-					key, loc.name, baseline.name))
+					key, loc.name, baseline.name), lang)
 			elif loc.subs[key] != baseline.subs[key]:
 				_log_error("String substitution for key '{0}' in '{1}' "
 					"is not the same as baseline '{2}'. "
 					"Substitution count and type must match.\n{1}:{3}\n{2}:{4}".format(\
-					key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]))
+					key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]), lang)
 
 		for key in baseline.subs:
 			if key not in loc.subs:
 				_log_error("String substitution for key '{0}' found in baseline {1} but not in '{2}'!".format(\
-					key, baseline.name, loc.name))
+					key, baseline.name, loc.name), lang)
 			elif loc.subs[key] != baseline.subs[key]:
 				_log_error("String substitution for key '{0}' in baseline '{1}' "
 					"is not the same as '{2}'. "
 					"Substitution count and type must match.\n{1}:{4}\n{2}:{3}".format(\
-					key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]))
+					key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
 
 	print "Done!"
 	return any_errors
