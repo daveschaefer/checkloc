@@ -71,16 +71,18 @@ def _log_error(msg, lang=None):
 		lang = "Main"
 
 	msg_out = "({0}) {1}".format(lang, msg)
-	if lang not in messages_by_language:
-		messages_by_language[lang] = []
 
-	# appending as lambda functionss allows us to combine error and warning messages
-	# and not have to re-calculate what to do with them
-	# or where they should be sent.
-	messages_by_language[lang].append(
-		lambda: logging.error(msg_out))
+	if (args.group_by_language):
+		if lang not in messages_by_language:
+			messages_by_language[lang] = []
 
-	logging.error(msg_out)
+		# appending as lambda functionss allows us to combine error and warning messages
+		# and not have to re-calculate what to do with them
+		# or where they should be sent.
+		messages_by_language[lang].append(
+			lambda: logging.error(msg_out))
+	else:
+		logging.error(msg_out)
 
 def _format_warning(message, category, filename, lineno, line=None):
 	"""
@@ -656,6 +658,10 @@ if __name__ == '__main__':
 				"Mainly intended to allow easier unit-testing of checkloc itself; "
 				"you should usually *NOT* use this flag.")
 
+	parser.add_argument('--group-by-language', default=False, action='store_true',
+		help="Save output until the end and group messages by language, "
+		"rather than as they are encountered.")
+
 	args = parser.parse_args()
 
 	loglevel = logging.WARNING
@@ -676,9 +682,10 @@ if __name__ == '__main__':
 
 	errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
 
-	for lang in sorted(messages_by_language):
-		for log_call in messages_by_language[lang]:
-			log_call()
+	if (args.group_by_language):
+		for lang in sorted(messages_by_language):
+			for log_call in messages_by_language[lang]:
+				log_call()
 
 	if (errors):
 		sys.exit(1)
