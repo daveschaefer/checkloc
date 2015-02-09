@@ -54,6 +54,7 @@ MANIFEST_LOCALE_START = 'locale'
 MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
+messages_by_language = {}
 
 
 def _log_error(msg, lang=None):
@@ -70,6 +71,15 @@ def _log_error(msg, lang=None):
 		lang = "Main"
 
 	msg_out = "({0}) {1}".format(lang, msg)
+	if lang not in messages_by_language:
+		messages_by_language[lang] = []
+
+	# appending as lambda functionss allows us to combine error and warning messages
+	# and not have to re-calculate what to do with them
+	# or where they should be sent.
+	messages_by_language[lang].append(
+		lambda: logging.error(msg_out))
+
 	logging.error(msg_out)
 
 def _format_warning(message, category, filename, lineno, line=None):
@@ -665,6 +675,11 @@ if __name__ == '__main__':
 		locales_only = True
 
 	errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
+
+	for lang in sorted(messages_by_language):
+		for log_call in messages_by_language[lang]:
+			log_call()
+
 	if (errors):
 		sys.exit(1)
 	else:
