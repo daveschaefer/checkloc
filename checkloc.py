@@ -20,6 +20,8 @@ Validate Mozilla-style localization files (XUL and string bundle)
 to make sure all localizations have the same strings in the same places.
 """
 
+from __future__ import print_function
+
 import argparse
 import codecs
 import json
@@ -74,6 +76,15 @@ def _log_warning(msg, lang=None):
 	If 'lang' is specified, the warning was found inside the data for that language.
 	"""
 	_log_message(msg, lang, warnings.warn)
+
+def _log_normal(msg, lang=None):
+	"""
+	Log a normal print message.
+	If 'lang' is specified, the message was generated inside the data for that language.
+	"""
+	if not output_json:
+		log_func = lambda m: print(m)
+		_log_message(msg, lang, log_func)
 
 def _log_message(msg, lang, log_func):
 	"""
@@ -567,7 +578,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 
 	langs = {}
 
-	print "Starting Localization tests..."
+	_log_normal("Starting Localization tests...")
 
 	manifest_dir = os.path.abspath(manifest_dir)
 	if not (os.path.exists(manifest_dir)):
@@ -602,7 +613,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 	if (len(langs) < 1):
 		_log_error("Did not find any language folders inside {0}!".format(loc_dirs))
 		return True
-	print "Found {0} languages: {1}.".format(len(langs), langs.keys())
+	_log_normal("Found {0} languages: {1}.".format(len(langs), langs.keys()))
 
 	if BASE_LOC not in langs:
 		_log_error("Base language folder '{0}' was not found in {1}".format(\
@@ -621,8 +632,8 @@ def validate_loc_files(manifest_dir, locales_only=False):
 	if (any_errors):
 		return True # error message has already been printed above
 
-	print "{0} keys found in baseline '{1}'.".format(\
-		len(baseline.keys), baseline.name)
+	_log_normal("{0} keys found in baseline '{1}'.".format(\
+		len(baseline.keys), baseline.name))
 
 	del langs[BASE_LOC] # don't test the baseline localization against itself
 
@@ -663,7 +674,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 					"Substitution count and type must match.\n{1}:{4}\n{2}:{3}".format(\
 					key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
 
-	print "Done!"
+	_log_normal("Done!")
 	return any_errors
 
 
@@ -720,7 +731,7 @@ if __name__ == '__main__':
 
 	if (args.group_by_language):
 		if (args.json):
-			print json.dumps(messages_by_language, sort_keys=True, indent=4)
+			print(json.dumps(messages_by_language, sort_keys=True, indent=4))
 		else:
 			for lang in sorted(messages_by_language):
 				for log_call in messages_by_language[lang]:
