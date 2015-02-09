@@ -27,6 +27,77 @@ Point the script at the directory that contains your extension's ```chrome.manif
 Or run ```>python checkloc/checkloc.py --help```
 
 
+## Examples
+
+**Normal output** - displays warnings and errors
+
+```
+>python checkloc/checkloc.py /your/amazing/extension
+(Main) Starting Localization tests...
+WARNING: (hr-HR) Locale folder 'hr-HR' exists in /your/amazing/extension/locale,
+ but no corresponding entry exists in install.rdf.
+WARNING: (ru) Locale folder 'ru' exists in /your/amazing/extension/locale, but n
+o corresponding entry exists in install.rdf.
+WARNING: (nl) Locale folder 'nl' exists in /your/amazing/extension/locale, but n
+o corresponding entry exists in install.rdf.
+(Main) Found 36 languages: ['el', 'zh-TW', 'vi', 'is', 'it', 'ar', 'uk-UA', 'cs'
+, 'sv-SE', 'es-ES', 'ru', 'sl-SI', 'sr', 'lv-LV', 'tr', 'lt', 'en-US', 'ro', 'pl
+', 'fr', 'bg', 'ms-MY', 'de', 'da', 'pt-BR', 'fi', 'hu', 'ja', 'he', 'hr-HR', 'p
+t-PT', 'es-AR', 'ko', 'zh-CN', 'hy-AM', 'nl'].
+(Main) 406 keys found in baseline 'en-US'.
+ERROR: (hr-HR) Key 'amazing.properties/FF' in 'en-US' but not in 'hr-HR'
+ERROR: (hr-HR) Key 'otherfile.properties/title.string' in 'en-US' but not in '
+hr-HR'
+(Main) Done!
+```
+
+**Group output by language** with ```--group-by-language```
+
+```
+>python checkloc/checkloc.py --group /your/amazing/extension
+(Main) Starting Localization tests...
+(Main) Found 36 languages: ['el', 'zh-TW', 'vi', 'is', 'it', 'ar', 'uk-UA', 'cs'
+, 'sv-SE', 'es-ES', 'ru', 'sl-SI', 'sr', 'lv-LV', 'tr', 'lt', 'en-US', 'ro', 'pl
+', 'fr', 'bg', 'ms-MY', 'de', 'da', 'pt-BR', 'fi', 'hu', 'ja', 'he', 'hr-HR', 'p
+t-PT', 'es-AR', 'ko', 'zh-CN', 'hy-AM', 'nl'].
+(Main) 406 keys found in baseline 'en-US'.
+(Main) Done!
+WARNING: (hr-HR) Locale folder 'hr-HR' exists in /your/amazing/extension/locale,
+ but no corresponding entry exists in install.rdf.
+ERROR: (hr-HR) Key 'amazing.properties/FF' in 'en-US' but not in 'hr-HR'
+ERROR: (hr-HR) Key 'otherfile.properties/title.string' in 'en-US' but not in '
+hr-HR'
+WARNING: (nl) Locale folder 'nl' exists in /your/amazing/extension/locale, but n
+o corresponding entry exists in install.rdf.
+WARNING: (ru) Locale folder 'ru' exists in /your/amazing/extension/locale, but n
+o corresponding entry exists in install.rdf.
+```
+
+**Output as JSON** with ```--json``` (also automatically groups by language)
+
+```
+>python checkloc/checkloc.py --json /your/amazing/extension
+{
+    "hr-HR": [
+        "WARNING: (hr-HR) Locale folder 'hr-HR' exists in your\\amazing\\extensi
+        on\\locale, but no corresponding entry exists in install.rdf.",
+
+        "ERROR: (hr-HR) Key 'amazing.properties/FF' in 'en-US' but not in '
+hr-HR'",
+        "ERROR: (hr-HR) Key 'otherfile.properties/title.string' in 'en-US' but
+ not in 'hr-HR'"
+    ],
+    "nl": [
+        "WARNING: (nl) Locale folder 'nl' exists in your\\amazing\\extension\\lo
+        cale, but no corresponding entry exists in install.rdf."
+    ],
+    "ru": [
+        "WARNING: (ru) Locale folder 'ru' exists in your\\amazing\\extension\\lo
+        cale, but no corresponding entry exists in install.rdf."
+    ],
+}
+```
+
 
 ## Current test cases
 
