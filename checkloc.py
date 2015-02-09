@@ -84,6 +84,29 @@ def _log_error(msg, lang=None):
 	else:
 		logging.error(msg_out)
 
+def _log_warning(msg, lang=None):
+	"""
+	Log a warning message.
+	If 'lang' is specified, the warning was found inside the data for that language.
+	"""
+	# TODO: don't repeat code
+	if not lang:
+		lang = "Main"
+
+	msg_out = "({0}) {1}".format(lang, msg)
+
+	if (args.group_by_language):
+		if lang not in messages_by_language:
+			messages_by_language[lang] = []
+		# appending as lambda functionss allows us to combine error and warning messages
+		# and not have to re-calculate what to do with them
+		# or where they should be sent.
+		messages_by_language[lang].append(
+			lambda: warnings.warn(msg_out))
+
+	else:
+		warnings.warn(msg_out)
+
 def _format_warning(message, category, filename, lineno, line=None):
 	"""
 	Format a warning message and return it as a string.
@@ -230,8 +253,8 @@ class LocalizationLanguage:
 									key, file_path))
 							else:
 								if len(entity.content) < 1:
-									warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
-										key, file_path))
+									_log_warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
+										key, file_path), self.name)
 								self.keys[key] = entity.content
 
 					except (etree.DTDParseError) as ex:
@@ -255,7 +278,7 @@ class LocalizationLanguage:
 				self._parse_properties_file(file_path)
 			else:
 				# not neccesarily a failure - there may just be extra files lying around.
-				warnings.warn("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
+				_log_warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path), self.name)
 
 		return self.parsing_errors
 
@@ -273,7 +296,7 @@ class LocalizationLanguage:
 			data = openfile.read()
 
 			if (len(data) < 1):
-				warnings.warn("{0} does not contain any lines".format(file_path))
+				_log_warning("{0} does not contain any lines".format(file_path), self.name)
 				return
 
 			data = re.sub(self.PROP_COMMENT, '', data)
@@ -471,28 +494,28 @@ class ManifestSet:
 			# also exist inside install.rdf.
 
 			if locale not in localecodes.MOZILLA_LOCALE_CODES:
-				warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-					locale))
+				_log_warning("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale), locale)
 
 		# check every install.rdf entry to make sure a locale folder exists
 		for locale in self.rdf_locs:
 			if (locale not in self.manifest_paths):
-				warnings.warn("Locale '{0}' is specified in install.rdf "
-					"but is not specified in chrome.manifest.".format(locale))
+				_log_warning("Locale '{0}' is specified in install.rdf "
+					"but is not specified in chrome.manifest.".format(locale), locale)
 			else:
 				locale_path = self.manifest_paths[locale]
 				if not (os.path.exists(locale_path)):
-					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+					_log_warning("Locale folder '{0}' is specified in install.rdf "
 						"line {1}, but {2} does not exist!".format(
-							locale, self.manifest_lines[locale], locale_path))
+							locale, self.manifest_lines[locale], locale_path), locale)
 				elif not (os.path.isdir(locale_path)):
-					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+					_log_warning("Locale folder '{0}' is specified in install.rdf "
 						"line {1}, but {2} is not a folder!".format(
-							locale, self.manifest_lines[locale], locale_path))
+							locale, self.manifest_lines[locale], locale_path), locale)
 
 			if locale not in localecodes.MOZILLA_LOCALE_CODES:
-				warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-					locale))
+				_log_warning("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale), locale)
 
 
 		# now calculate the locale subdirectories
@@ -514,8 +537,8 @@ class ManifestSet:
 				_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
 					"exists in the chrome.manifest.".format(lang, dir_path), lang)
 			if (lang not in self.rdf_locs):
-				warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
-					"exists in install.rdf.".format(lang, dir_path))
+				_log_warning("Locale folder '{0}' exists in {1}, but no corresponding entry "
+					"exists in install.rdf.".format(lang, dir_path), lang)
 
 		self.manifests_parsed = True
 
