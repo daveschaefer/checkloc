@@ -54,6 +54,7 @@ MANIFEST_LOCALE_START = 'locale'
 MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
+group_by_language = False
 messages_by_language = {}
 
 
@@ -87,7 +88,7 @@ def _log_message(msg, lang, log_func):
 
 	msg_out = "({0}) {1}".format(lang, msg)
 
-	if (args.group_by_language):
+	if (group_by_language):
 		if lang not in messages_by_language:
 			messages_by_language[lang] = []
 
@@ -694,6 +695,9 @@ if __name__ == '__main__':
 	locales_only = False
 	if (args.locales_only):
 		locales_only = True
+
+	if (args.group_by_language):
+		group_by_language = True
 
 	errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
 
