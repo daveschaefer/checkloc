@@ -22,6 +22,7 @@ to make sure all localizations have the same strings in the same places.
 
 import argparse
 import codecs
+import json
 import linecache
 import logging
 import os
@@ -55,6 +56,8 @@ MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
 group_by_language = False
+output_json = False
+
 messages_by_language = {}
 
 
@@ -92,11 +95,18 @@ def _log_message(msg, lang, log_func):
 		if lang not in messages_by_language:
 			messages_by_language[lang] = []
 
-		# appending as lambda functionss allows us to combine error and warning messages
-		# and not have to re-calculate what to do with them
-		# or where they should be sent.
-		messages_by_language[lang].append(
-			lambda: log_func(msg_out))
+		if (output_json):
+			if log_func == logging.error:
+				msg_out = "ERROR: " + msg_out
+			elif log_func == warnings.warn:
+				msg_out = "WARNING: " + msg_out
+			messages_by_language[lang].append(msg_out)
+		else:
+			# appending as lambda functionss allows us to combine error and warning messages
+			# and not have to re-calculate what to do with them
+			# or where they should be sent.
+			messages_by_language[lang].append(
+				lambda: log_func(msg_out))
 	else:
 		log_func(msg_out)
 
@@ -677,6 +687,9 @@ if __name__ == '__main__':
 	parser.add_argument('--group-by-language', default=False, action='store_true',
 		help="Save output until the end and group messages by language, "
 		"rather than as they are encountered.")
+	parser.add_argument('--json', default=False, action='store_true',
+		help="Output messages as JSON rather than standard messages. "
+		"Enabling this implies also enabling --group-by-language.")
 
 	args = parser.parse_args()
 
@@ -696,15 +709,22 @@ if __name__ == '__main__':
 	if (args.locales_only):
 		locales_only = True
 
-	if (args.group_by_language):
+	if args.json:
+		args.group_by_language = True
+		output_json = True
+
+	if args.group_by_language:
 		group_by_language = True
 
 	errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
 
 	if (args.group_by_language):
-		for lang in sorted(messages_by_language):
-			for log_call in messages_by_language[lang]:
-				log_call()
+		if (args.json):
+			print json.dumps(messages_by_language, sort_keys=True, indent=4)
+		else:
+			for lang in sorted(messages_by_language):
+				for log_call in messages_by_language[lang]:
+					log_call()
 
 	if (errors):
 		sys.exit(1)
