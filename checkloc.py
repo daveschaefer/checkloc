@@ -20,8 +20,11 @@ Validate Mozilla-style localization files (XUL and string bundle)
 to make sure all localizations have the same strings in the same places.
 """
 
+from __future__ import print_function
+
 import argparse
 import codecs
+import json
 import linecache
 import logging
 import os
@@ -43,7 +46,7 @@ import localecodes
 # MAJOR version when you make backwards-incompatible changes,
 # MINOR version when you add functionality in a backwards-compatible manner
 # PATCH version when you make backwards-compatible bug fixes.
-VERSION = "2.0"
+VERSION = "2.1a"
 
 # the en-US translation will have all files and strings created. Use it as the base.
 BASE_LOC = 'en-US'
@@ -54,16 +57,69 @@ MANIFEST_LOCALE_START = 'locale'
 MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
 any_errors = False
+group_by_language = False
+output_json = False
+
+messages_by_language = {}
 
 
-def _log_error(msg):
-	"""Log an error message."""
+def _log_error(msg, lang=None):
+	"""
+	Log an error message.
+	If 'lang' is specified, the error was found inside the data for that language.
+	"""
+	_log_message(msg, lang, logging.error)
+
+def _log_warning(msg, lang=None):
+	"""
+	Log a warning message.
+	If 'lang' is specified, the warning was found inside the data for that language.
+	"""
+	_log_message(msg, lang, warnings.warn)
+
+def _log_normal(msg, lang=None):
+	"""
+	Log a normal print message.
+	If 'lang' is specified, the message was generated inside the data for that language.
+	"""
+	if not output_json:
+		log_func = lambda m: print(m)
+		_log_message(msg, lang, log_func)
+
+def _log_message(msg, lang, log_func):
+	"""
+	Log a message to the appropriate place via log_func().
+	"""
 	# this function wraps setting the global error flag
 	# to keep all error code in one place
 	global any_errors
 
-	any_errors = True
-	logging.error(msg)
+	if log_func == logging.error:
+		any_errors = True
+
+	if not lang:
+		lang = "Main"
+
+	msg_out = "({0}) {1}".format(lang, msg)
+
+	if (group_by_language):
+		if lang not in messages_by_language:
+			messages_by_language[lang] = []
+
+		if (output_json):
+			if log_func == logging.error:
+				msg_out = "ERROR: " + msg_out
+			elif log_func == warnings.warn:
+				msg_out = "WARNING: " + msg_out
+			messages_by_language[lang].append(msg_out)
+		else:
+			# appending as lambda functionss allows us to combine error and warning messages
+			# and not have to re-calculate what to do with them
+			# or where they should be sent.
+			messages_by_language[lang].append(
+				lambda: log_func(msg_out))
+	else:
+		log_func(msg_out)
 
 def _format_warning(message, category, filename, lineno, line=None):
 	"""
@@ -143,7 +199,7 @@ class LocalizationLanguage:
 		# this function wraps setting the parsing error flag
 		# to keep all error code in one place
 		self.parsing_errors = True
-		logging.error(msg)
+		_log_error(msg, self.name)
 
 
 	def _extract_first_dtd_parse_error_info(self, err):
@@ -211,8 +267,8 @@ class LocalizationLanguage:
 									key, file_path))
 							else:
 								if len(entity.content) < 1:
-									warnings.warn("Key '{0}' in {1} has a blank value. Is this desired?".format(\
-										key, file_path))
+									_log_warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
+										key, file_path), self.name)
 								self.keys[key] = entity.content
 
 					except (etree.DTDParseError) as ex:
@@ -236,7 +292,7 @@ class LocalizationLanguage:
 				self._parse_properties_file(file_path)
 			else:
 				# not neccesarily a failure - there may just be extra files lying around.
-				warnings.warn("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path))
+				_log_warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path), self.name)
 
 		return self.parsing_errors
 
@@ -254,7 +310,7 @@ class LocalizationLanguage:
 			data = openfile.read()
 
 			if (len(data) < 1):
-				warnings.warn("{0} does not contain any lines".format(file_path))
+				_log_warning("{0} does not contain any lines".format(file_path), self.name)
 				return
 
 			data = re.sub(self.PROP_COMMENT, '', data)
@@ -438,11 +494,11 @@ class ManifestSet:
 			if not (os.path.exists(locale_path)):
 				_log_error("Locale folder '{0}' is specified in chrome.manifest "
 					"line {1}, but {2} does not exist!".format(
-						locale, self.manifest_lines[locale], locale_path))
+						locale, self.manifest_lines[locale], locale_path), locale)
 			elif not (os.path.isdir(locale_path)):
 				_log_error("Locale folder '{0}' is specified in chrome.manifest "
 					"line {1}, but {2} is not a folder!".format(
-						locale, self.manifest_lines[locale], locale_path))
+						locale, self.manifest_lines[locale], locale_path), locale)
 
 			# if an entry exists in chrome.manifest then it must exist on disk
 			# or we will raise an error.
@@ -452,28 +508,28 @@ class ManifestSet:
 			# also exist inside install.rdf.
 
 			if locale not in localecodes.MOZILLA_LOCALE_CODES:
-				warnings.warn("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-					locale))
+				_log_warning("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale), locale)
 
 		# check every install.rdf entry to make sure a locale folder exists
 		for locale in self.rdf_locs:
 			if (locale not in self.manifest_paths):
-				warnings.warn("Locale '{0}' is specified in install.rdf "
-					"but is not specified in chrome.manifest.".format(locale))
+				_log_warning("Locale '{0}' is specified in install.rdf "
+					"but is not specified in chrome.manifest.".format(locale), locale)
 			else:
 				locale_path = self.manifest_paths[locale]
 				if not (os.path.exists(locale_path)):
-					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+					_log_warning("Locale folder '{0}' is specified in install.rdf "
 						"line {1}, but {2} does not exist!".format(
-							locale, self.manifest_lines[locale], locale_path))
+							locale, self.manifest_lines[locale], locale_path), locale)
 				elif not (os.path.isdir(locale_path)):
-					warnings.warn("Locale folder '{0}' is specified in install.rdf "
+					_log_warning("Locale folder '{0}' is specified in install.rdf "
 						"line {1}, but {2} is not a folder!".format(
-							locale, self.manifest_lines[locale], locale_path))
+							locale, self.manifest_lines[locale], locale_path), locale)
 
 			if locale not in localecodes.MOZILLA_LOCALE_CODES:
-				warnings.warn("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-					locale))
+				_log_warning("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
+					locale), locale)
 
 
 		# now calculate the locale subdirectories
@@ -493,10 +549,10 @@ class ManifestSet:
 
 			if (lang not in self.manifest_paths):
 				_log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
-					"exists in the chrome.manifest.".format(lang, dir_path))
+					"exists in the chrome.manifest.".format(lang, dir_path), lang)
 			if (lang not in self.rdf_locs):
-				warnings.warn("Locale folder '{0}' exists in {1}, but no corresponding entry "
-					"exists in install.rdf.".format(lang, dir_path))
+				_log_warning("Locale folder '{0}' exists in {1}, but no corresponding entry "
+					"exists in install.rdf.".format(lang, dir_path), lang)
 
 		self.manifests_parsed = True
 
@@ -522,7 +578,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 
 	langs = {}
 
-	print "Starting Localization tests..."
+	_log_normal("Starting Localization tests...")
 
 	manifest_dir = os.path.abspath(manifest_dir)
 	if not (os.path.exists(manifest_dir)):
@@ -557,7 +613,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 	if (len(langs) < 1):
 		_log_error("Did not find any language folders inside {0}!".format(loc_dirs))
 		return True
-	print "Found {0} languages: {1}.".format(len(langs), langs.keys())
+	_log_normal("Found {0} languages: {1}.".format(len(langs), langs.keys()))
 
 	if BASE_LOC not in langs:
 		_log_error("Base language folder '{0}' was not found in {1}".format(\
@@ -576,8 +632,8 @@ def validate_loc_files(manifest_dir, locales_only=False):
 	if (any_errors):
 		return True # error message has already been printed above
 
-	print "{0} keys found in baseline '{1}'.".format(\
-		len(baseline.keys), baseline.name)
+	_log_normal("{0} keys found in baseline '{1}'.".format(\
+		len(baseline.keys), baseline.name))
 
 	del langs[BASE_LOC] # don't test the baseline localization against itself
 
@@ -589,36 +645,36 @@ def validate_loc_files(manifest_dir, locales_only=False):
 		for key in loc.keys:
 			if (key not in baseline.keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, loc.name, baseline.name))
+					key, loc.name, baseline.name), lang)
 
 		for key in baseline.keys:
 			if (key not in loc.keys):
 				_log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-					key, baseline.name, loc.name))
+					key, baseline.name, loc.name), lang)
 
 		# make sure .properties string substitutions match
 		# keys that don't exist in one loc will already have been caught above
 		for key in loc.subs:
 			if key not in baseline.subs:
 				_log_error("String substitution for key '{0}' found in '{1}' but not in baseline {2}!".format(\
-					key, loc.name, baseline.name))
+					key, loc.name, baseline.name), lang)
 			elif loc.subs[key] != baseline.subs[key]:
 				_log_error("String substitution for key '{0}' in '{1}' "
 					"is not the same as baseline '{2}'. "
 					"Substitution count and type must match.\n{1}:{3}\n{2}:{4}".format(\
-					key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]))
+					key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]), lang)
 
 		for key in baseline.subs:
 			if key not in loc.subs:
 				_log_error("String substitution for key '{0}' found in baseline {1} but not in '{2}'!".format(\
-					key, baseline.name, loc.name))
+					key, baseline.name, loc.name), lang)
 			elif loc.subs[key] != baseline.subs[key]:
 				_log_error("String substitution for key '{0}' in baseline '{1}' "
 					"is not the same as '{2}'. "
 					"Substitution count and type must match.\n{1}:{4}\n{2}:{3}".format(\
-					key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]))
+					key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
 
-	print "Done!"
+	_log_normal("Done!")
 	return any_errors
 
 
@@ -639,6 +695,13 @@ if __name__ == '__main__':
 				"Mainly intended to allow easier unit-testing of checkloc itself; "
 				"you should usually *NOT* use this flag.")
 
+	parser.add_argument('--group-by-language', default=False, action='store_true',
+		help="Save output until the end and group messages by language, "
+		"rather than as they are encountered.")
+	parser.add_argument('--json', default=False, action='store_true',
+		help="Output messages as JSON rather than standard messages. "
+		"Enabling this implies also enabling --group-by-language.")
+
 	args = parser.parse_args()
 
 	loglevel = logging.WARNING
@@ -657,7 +720,23 @@ if __name__ == '__main__':
 	if (args.locales_only):
 		locales_only = True
 
+	if args.json:
+		args.group_by_language = True
+		output_json = True
+
+	if args.group_by_language:
+		group_by_language = True
+
 	errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
+
+	if (args.group_by_language):
+		if (args.json):
+			print(json.dumps(messages_by_language, sort_keys=True, indent=4))
+		else:
+			for lang in sorted(messages_by_language):
+				for log_call in messages_by_language[lang]:
+					log_call()
+
 	if (errors):
 		sys.exit(1)
 	else:

@@ -12,6 +12,13 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+2.1
+---
++ Add switch to group output by language
++ Add switch to output results as JSON rather than normal print statements
+	(implies grouping by language)
+
+
 2.0
 ---
 * Change module interface - pass the location of the chrome.manifest file, rather
