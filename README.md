@@ -20,7 +20,9 @@ This script can be run before deploying your Firefox or SeaMonkey extension to t
 
 ## Usage
 
-```>python checkloc/checkloc.py path/to/your/plugin/chrome/locale```
+```>python checkloc/checkloc.py path/to/your/extension```
+
+Point the script at the directory that contains your extension's ```chrome.manifest``` file.
 
 Or run ```>python checkloc/checkloc.py --help```
 
