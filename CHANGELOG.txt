@@ -12,6 +12,11 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+2.1.1
+-----
+* Explicitly and only add namespaces we need when searching. Fix for behaviour change in lxml 3.5.0 (GH #14)
+
+
 2.1
 ---
 + Add switch to group output by language
