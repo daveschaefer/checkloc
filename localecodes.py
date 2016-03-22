@@ -158,6 +158,7 @@ MOZILLA_LOCALE_CODES = {
 	'ta-IN': True,
 	'ta-LK': True,
 	'te': True,
+	'tl': True,
 	'th': True,
 	'tn': True,
 	'tr': True,
