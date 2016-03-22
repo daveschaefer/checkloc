@@ -162,7 +162,7 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 
 1. [Java ```.properties``` file specification](http://docs.oracle.com/javase/8/docs/api/java/util/Properties.html)
 2. [Wikipedia - ```.properties```](https://en.wikipedia.org/wiki/.properties)
-3. <a name="max10subs"></a>[nsStringBundle.cpp](https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp) - ```FormatString()``` only supports at most 10 string substitution parameters:  
+3. Firefox <a name="max10subs"></a>[nsStringBundle.cpp](https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp) - ```FormatString()``` only supports at most 10 string substitution parameters:  
 	```// this function supports at most 10 parameters.. see below for why```  
 	```// ...```  
 	```NS_ENSURE_ARG(aLength <= 10); // enforce 10-parameter limit```
@@ -171,3 +171,4 @@ Test cases marked with *[w]* generate a warning; all other cases generate errors
 6. [```install.rdf``` - Add-on Install Manifests](https://developer.mozilla.org/en-US/Add-ons/Install_Manifests)
 7. [Mozilla Localization ("L10n") Teams](https://wiki.mozilla.org/L10n:Localization_Teams)
 8. [Mozilla Locale Codes](https://wiki.mozilla.org/L10n:Locale_Codes)
+9. [Firefox iOS locales](https://github.com/mozilla/firefox-ios/blob/v3.x/shipping_locales.txt)
