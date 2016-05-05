@@ -12,6 +12,14 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+2.1.3
+-----
+* Fix many bugs with pylint
+	main code: -5.33 -> 7.13
+	locale file: -382.50 -> 7.50
+	tests: -2.17 -> 6.98
+
+
 2.1.2
 -----
 * Add locale 'tl'
