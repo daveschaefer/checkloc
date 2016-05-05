@@ -792,7 +792,7 @@ if __name__ == '__main__':
     # send warning messages through our logging system
     # with the desired formatting
     logging.captureWarnings(True)
-    warnings.formatwarning=_format_warning
+    warnings.formatwarning = _format_warning
 
     locales_only = False
     if args.locales_only:
