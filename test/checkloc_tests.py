@@ -182,9 +182,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     loglevel = logging.WARNING
-    if (args.verbose):
+    if args.verbose:
         loglevel = logging.INFO
-    elif (args.quiet):
+    elif args.quiet:
         loglevel = logging.CRITICAL
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
