@@ -131,7 +131,7 @@ def _format_warning(message, category, filename, lineno, line=None):
     return message
 
 
-class LocalizationLanguage:
+class LocalizationLanguage(object):
     """
     Encapsulate all of the parsing, storage, and logic necessary
     to create, hold, and work with one particular localization language.
@@ -412,7 +412,7 @@ class LocalizationLanguage:
 
         return
 
-class ManifestSet:
+class ManifestSet(object):
     """
     Encapsulate all of the parsing, storage, and logic necessary
     to create, hold, and work with one particular set of Mozilla extension
