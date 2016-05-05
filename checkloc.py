@@ -424,8 +424,12 @@ class ManifestSet(object):
         Create a new ManifestSet.
         Argument: path to the directory that contains chrome.manifest
         """
+        self.loc_base_dirs = {}
         self.manifest_dir = manifest_dir
+        self.manifest_lines = {}
+        self.manifest_paths = {}
         self.manifests_parsed = False
+        self.rdf_locs = {}
 
     def validate_manifests(self):
         """
