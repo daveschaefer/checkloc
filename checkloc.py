@@ -35,7 +35,9 @@ import warnings
 try:
     from lxml import etree
 except ImportError:
-    warnings.warn("python lxml library not found; localization tests cannot be run. Please install the python 'lxml' library to run localization tests.")
+    warnings.warn(
+        "python lxml library not found; localization tests cannot be run. "
+        "Please install the python 'lxml' library to run localization tests.")
     sys.exit(0)
 
 import localecodes
@@ -247,7 +249,8 @@ class LocalizationLanguage(object):
             with open(file_path, 'rb') as rawfile:
                 if rawfile.read(bytes).startswith(codecs.BOM_UTF8):
                     self._log_error(
-                        "File '{0}' contains Byte Order Marker; localization files should not contain BOM."
+                        "File '{0}' contains Byte Order Marker; "
+                        "localization files should not contain BOM."
                         .format(file_path))
 
             if file_path.endswith('.dtd'):
@@ -278,7 +281,8 @@ class LocalizationLanguage(object):
                                 self.keys[key] = entity.content
 
                     except (etree.DTDParseError) as ex:
-                        (_, line, column, _, _, _, message) = self._extract_first_dtd_parse_error_info(ex)
+                        (_, line, column, _, _, _, message) =\
+                            self._extract_first_dtd_parse_error_info(ex)
 
                         # get the error line so we can show the user where the problem may be
                         error_line = linecache.getline(file_path, int(line)).strip()
@@ -388,16 +392,16 @@ class LocalizationLanguage(object):
 
                         if valid:
                             self.keys[key] = value
-                            # different languages can of course use substitutions in different orders
-                            # but sort so we can ensure the count and type are the same
+                            # different languages can use substitutions in different orders
+                            # sort to ensure the count and type are the same
                             numeric_subs_list.sort()
                             if (numeric_subs_list and numeric_subs_list[-1] > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS) or \
                                 regular_subs > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
                                 (numeric_subs_list and \
                                     ((numeric_subs_list[-1] + regular_subs) > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
                                 self._log_error(
-                                    "More than {0} string substitutions found for key '{1}' "
-                                    "in '{2}'. Mozilla does not allow this for performance reasons. "
+                                    "More than {0} string substitutions found for key '{1}' in '{2}'. "
+                                    "Mozilla does not allow this for performance reasons. "
                                     "See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
                                     "".format(self.MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
 
@@ -477,8 +481,10 @@ class ManifestSet(object):
                         locale = match.groups(1)[0]
                         locale_subdir = match.group(2)
                         # go one dir up to get the main locale directory
-                        base_dir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir, '..'))
-                        locale_absdir = os.path.abspath(os.path.join(self.manifest_dir, locale_subdir))
+                        base_dir = os.path.abspath(os.path.join(
+                            self.manifest_dir, locale_subdir, '..'))
+                        locale_absdir = os.path.abspath(os.path.join(
+                            self.manifest_dir, locale_subdir))
 
                         self.loc_base_dirs[base_dir] = True
 
