@@ -246,7 +246,8 @@ class LocalizationLanguage:
             bytes = min(32, os.path.getsize(file_path))
             with open(file_path, 'rb') as rawfile:
                 if rawfile.read(bytes).startswith(codecs.BOM_UTF8):
-                    self._log_error("File '{0}' contains Byte Order Marker; localization files should not contain BOM."\
+                    self._log_error(
+                        "File '{0}' contains Byte Order Marker; localization files should not contain BOM."
                         .format(file_path))
 
             if (file_path.endswith('.dtd')):
@@ -258,17 +259,22 @@ class LocalizationLanguage:
                             # it always takes the first entry.
                             key = file_name + self.LSEP + entity.name
                             if key in self.keys:
-                                self._log_error("Duplicate dtd key '{0}' found in {1}".format(\
-                                    key, file_path))
+                                self._log_error(
+                                    "Duplicate dtd key '{0}' found in {1}"
+                                    .format(key, file_path))
                             # check for invalid content
                             # lxml will already check for '%' in values when it parses the file
                             elif '<' in entity.content:
-                                self._log_error("The value for '{0}' in {1} contains the invalid character '<'. This is not allowed; please remove this character.".format(\
-                                    key, file_path))
+                                self._log_error(
+                                    "The value for '{0}' in {1} contains the invalid character "
+                                    "'<'. This is not allowed; please remove this character."
+                                    .format(key, file_path))
                             else:
                                 if len(entity.content) < 1:
-                                    _log_warning("Key '{0}' in {1} has a blank value. Is this desired?".format(\
-                                        key, file_path), self.name)
+                                    _log_warning(
+                                        "Key '{0}' in {1} has a blank value. "
+                                        "Is this desired?"
+                                        .format(key, file_path), self.name)
                                 self.keys[key] = entity.content
 
                     except (etree.DTDParseError) as ex:
@@ -279,20 +285,27 @@ class LocalizationLanguage:
                         linecache.clearcache()
                         highlight_string = (" " * (int(column) - 1)) + "^"
 
-                        error_message = "DTD syntax error starting at Line {0}, Col {1}: {2}\n{3}\n{4}\n{5}\n{6}\n{7}".format(\
-                            line, column, message,
-                            "Error line shown below, problem marked with ^:",
-                            error_line, highlight_string,
-                            "Full error details:",
-                            ex.error_log)
-                        self._log_error("Could not parse {0}: {1}".format(\
-                            file_path, error_message))
+                        error_message = "DTD syntax error starting at "\
+                            "Line {0}, Col {1}: {2}\n{3}\n{4}\n{5}\n{6}\n{7}".format(
+                                line,
+                                column,
+                                message,
+                                "Error line shown below, problem marked with ^:",
+                                error_line,
+                                highlight_string,
+                                "Full error details:",
+                                ex.error_log)
+                        self._log_error(
+                            "Could not parse {0}: {1}"
+                            .format(file_path, error_message))
 
             elif (file_path.endswith('.properties')):
                 self._parse_properties_file(file_path)
             else:
                 # not neccesarily a failure - there may just be extra files lying around.
-                _log_warning("File {0} is not a .dtd or .properties file. Ignoring.".format(file_path), self.name)
+                _log_warning(
+                    "File {0} is not a .dtd or .properties file. Ignoring."
+                    .format(file_path), self.name)
 
         return self.parsing_errors
 
@@ -326,11 +339,13 @@ class LocalizationLanguage:
                     key = file_name + self.LSEP + match.group(1)
                     value = match.group(2)
                     if key in self.keys:
-                        self._log_error("Duplicate property key '{0}' found in {1}".format(\
-                            key, file_path))
+                        self._log_error(
+                            "Duplicate property key '{0}' found in {1}"
+                            .format(key, file_path))
                     elif len(value) < 1:
-                        self._log_error("Key '{0}' in {1} has a blank value".format(\
-                            key, file_path))
+                        self._log_error(
+                            "Key '{0}' in {1} has a blank value"
+                            .format(key, file_path))
                     # the only special character for .properties files is %
                     # used to substitute values when calling strbundle.getFormattedString().
                     # https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files#Text_Formatting
@@ -355,13 +370,17 @@ class LocalizationLanguage:
                                 x += 1
                                 if pmatch.group(1):
                                     numeric_subs_list.append(int(pmatch.group(1).replace('$', '')))
-                                    logging.info("String substitution found. {0}".format(numeric_subs_list))
+                                    logging.info(
+                                        "String substitution found. {0}"
+                                        .format(numeric_subs_list))
                                     x += len(pmatch.group(1))
                                 else:
                                     regular_subs += 1
                             else:
-                                self._log_error("key '{0}' contains improper use of % in {1}. Position marked by ^ below:\n{2}\n{3}".format(\
-                                    key, file_path, value, "{0}^".format(" " * x)))
+                                self._log_error(
+                                    "key '{0}' contains improper use of % in {1}. "
+                                    "Position marked by ^ below:\n{2}\n{3}"
+                                    .format(key, file_path, value, "{0}^".format(" " * x)))
                                 valid = False
                                 break
 
@@ -376,18 +395,20 @@ class LocalizationLanguage:
                                 regular_subs > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
                                 (numeric_subs_list and \
                                     ((numeric_subs_list[-1] + regular_subs) > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
-                                self._log_error("More than {0} string substitutions found for key '{1}' "
-                                "in '{2}'. Mozilla does not allow this for performance reasons. "
-                                "See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
-                                "".format(self.MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
+                                self._log_error(
+                                    "More than {0} string substitutions found for key '{1}' "
+                                    "in '{2}'. Mozilla does not allow this for performance reasons. "
+                                    "See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
+                                    "".format(self.MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
 
                             self.subs[key] = ''.join(str(numeric_subs_list))
 
                     else:
                         self.keys[key] = value
                 elif len(line) > 0: # not an empty string
-                    self._log_error("line '{0}' does not match any .properties file patterns for {1}".format(\
-                        line, file_path))
+                    self._log_error(
+                        "line '{0}' does not match any .properties file patterns for {1}"
+                        .format(line, file_path))
 
         return
 
@@ -417,16 +438,20 @@ class ManifestSet:
         self.rdf_locs = {}
 
         if not (os.path.exists(self.manifest_dir) and os.path.isdir(self.manifest_dir)):
-            _log_error("Main plugin directory {0} does not exist; cannot validate chrome.manifest. "
+            _log_error(
+                "Main plugin directory {0} does not exist; cannot validate chrome.manifest. "
                 "If you wish to skip validation of chrome.manifest please specify the "
-                "--locales-only switch when running tests.".format(self.manifest_dir))
+                "--locales-only switch when running tests."
+                .format(self.manifest_dir))
             return
 
         manifest = os.path.join(self.manifest_dir, 'chrome.manifest')
         if not (os.path.exists(manifest)):
-            _log_error("File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
+            _log_error(
+                "File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
                 "If you wish to skip validation of chrome.manifest please specify the "
-                "--locales-only switch when running tests.".format(self.manifest_dir))
+                "--locales-only switch when running tests."
+                .format(self.manifest_dir))
             return
 
         # parse the chrome.manfiest file and save locale data.
@@ -458,20 +483,25 @@ class ManifestSet:
                         if locale not in self.manifest_lines:
                             self.manifest_lines[locale] = i
                         else:
-                            _log_error("Locale '{0}' is defined more than once inside chrome.manifest. "
-                                "Each locale should only be defined once.".format(locale))
+                            _log_error(
+                                "Locale '{0}' is defined more than once inside chrome.manifest. "
+                                "Each locale should only be defined once."
+                                .format(locale))
                     else:
-                        _log_error("Invalid locale line found in chrome.manifest on line {0}:\n  {1}".format(
-                            i, line))
+                        _log_error(
+                            "Invalid locale line found in chrome.manifest on line {0}:\n  {1}"
+                            .format(i, line))
                 i += 1
 
 
         # also parse install.rdf
         install_rdf = os.path.abspath(os.path.join(self.manifest_dir, 'install.rdf'))
         if not (os.path.exists(install_rdf)):
-            _log_error("File install.rdf does not exist in {0} ; cannot validate. "
+            _log_error(
+                "File install.rdf does not exist in {0} ; cannot validate. "
                 "If you wish to skip validation please specify the "
-                "--locales-only switch when running tests.".format(self.manifest_dir))
+                "--locales-only switch when running tests."
+                .format(self.manifest_dir))
             return
 
         try:
@@ -487,8 +517,10 @@ class ManifestSet:
                 if loc not in self.rdf_locs:
                     self.rdf_locs[loc] = True
                 else:
-                    _log_error("Locale '{0}' is defined more than once inside install.rdf. "
-                        "Each locale should only be defined once.".format(loc))
+                    _log_error(
+                        "Locale '{0}' is defined more than once inside install.rdf. "
+                        "Each locale should only be defined once."
+                        .format(loc))
         except etree.XMLSyntaxError as ex:
             _log_error("Could not parse {0}: {1}".format(install_rdf, ex))
 
@@ -497,13 +529,15 @@ class ManifestSet:
         for locale in self.manifest_paths:
             locale_path = self.manifest_paths[locale]
             if not (os.path.exists(locale_path)):
-                _log_error("Locale folder '{0}' is specified in chrome.manifest "
-                    "line {1}, but {2} does not exist!".format(
-                        locale, self.manifest_lines[locale], locale_path), locale)
+                _log_error(
+                    "Locale folder '{0}' is specified in chrome.manifest "
+                    "line {1}, but {2} does not exist!"
+                    .format(locale, self.manifest_lines[locale], locale_path), locale)
             elif not (os.path.isdir(locale_path)):
-                _log_error("Locale folder '{0}' is specified in chrome.manifest "
-                    "line {1}, but {2} is not a folder!".format(
-                        locale, self.manifest_lines[locale], locale_path), locale)
+                _log_error(
+                    "Locale folder '{0}' is specified in chrome.manifest "
+                    "line {1}, but {2} is not a folder!"
+                    .format(locale, self.manifest_lines[locale], locale_path), locale)
 
             # if an entry exists in chrome.manifest then it must exist on disk
             # or we will raise an error.
@@ -513,28 +547,35 @@ class ManifestSet:
             # also exist inside install.rdf.
 
             if locale not in localecodes.MOZILLA_LOCALE_CODES:
-                _log_warning("chrome.manifest locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-                    locale), locale)
+                _log_warning(
+                    "chrome.manifest locale '{0}' does not exist "
+                    "in the list of Mozilla locale codes."
+                    .format(locale), locale)
 
         # check every install.rdf entry to make sure a locale folder exists
         for locale in self.rdf_locs:
             if (locale not in self.manifest_paths):
-                _log_warning("Locale '{0}' is specified in install.rdf "
-                    "but is not specified in chrome.manifest.".format(locale), locale)
+                _log_warning(
+                    "Locale '{0}' is specified in install.rdf "
+                    "but is not specified in chrome.manifest."
+                    .format(locale), locale)
             else:
                 locale_path = self.manifest_paths[locale]
                 if not (os.path.exists(locale_path)):
-                    _log_warning("Locale folder '{0}' is specified in install.rdf "
-                        "line {1}, but {2} does not exist!".format(
-                            locale, self.manifest_lines[locale], locale_path), locale)
+                    _log_warning(
+                        "Locale folder '{0}' is specified in install.rdf "
+                        "line {1}, but {2} does not exist!"
+                        .format(locale, self.manifest_lines[locale], locale_path), locale)
                 elif not (os.path.isdir(locale_path)):
-                    _log_warning("Locale folder '{0}' is specified in install.rdf "
-                        "line {1}, but {2} is not a folder!".format(
-                            locale, self.manifest_lines[locale], locale_path), locale)
+                    _log_warning(
+                        "Locale folder '{0}' is specified in install.rdf "
+                        "line {1}, but {2} is not a folder!"
+                        .format(locale, self.manifest_lines[locale], locale_path), locale)
 
             if locale not in localecodes.MOZILLA_LOCALE_CODES:
-                _log_warning("install.rdf locale '{0}' does not exist in the list of Mozilla locale codes.".format(
-                    locale), locale)
+                _log_warning(
+                    "install.rdf locale '{0}' does not exist in the list of Mozilla locale codes."
+                    .format(locale), locale)
 
 
         # now calculate the locale subdirectories
@@ -553,11 +594,15 @@ class ManifestSet:
                 dir_path = os.path.abspath(os.path.join(self.manifest_paths[lang], '..'))
 
             if (lang not in self.manifest_paths):
-                _log_error("Locale folder '{0}' exists in {1}, but no corresponding entry "
-                    "exists in the chrome.manifest.".format(lang, dir_path), lang)
+                _log_error(
+                    "Locale folder '{0}' exists in {1}, but no corresponding entry "
+                    "exists in the chrome.manifest."
+                    .format(lang, dir_path), lang)
             if (lang not in self.rdf_locs):
-                _log_warning("Locale folder '{0}' exists in {1}, but no corresponding entry "
-                    "exists in install.rdf.".format(lang, dir_path), lang)
+                _log_warning(
+                    "Locale folder '{0}' exists in {1}, but no corresponding entry "
+                    "exists in install.rdf."
+                    .format(lang, dir_path), lang)
 
         self.manifests_parsed = True
 
@@ -637,8 +682,9 @@ def validate_loc_files(manifest_dir, locales_only=False):
     if (any_errors):
         return True # error message has already been printed above
 
-    _log_normal("{0} keys found in baseline '{1}'.".format(\
-        len(baseline.keys), baseline.name))
+    _log_normal(
+        "{0} keys found in baseline '{1}'."
+        .format(len(baseline.keys), baseline.name))
 
     del langs[BASE_LOC] # don't test the baseline localization against itself
 
@@ -649,35 +695,41 @@ def validate_loc_files(manifest_dir, locales_only=False):
 
         for key in loc.keys:
             if (key not in baseline.keys):
-                _log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-                    key, loc.name, baseline.name), lang)
+                _log_error(
+                    "Key '{0}' in '{1}' but not in '{2}'"
+                    .format(key, loc.name, baseline.name), lang)
 
         for key in baseline.keys:
             if (key not in loc.keys):
-                _log_error("Key '{0}' in '{1}' but not in '{2}'".format(\
-                    key, baseline.name, loc.name), lang)
+                _log_error(
+                    "Key '{0}' in '{1}' but not in '{2}'"
+                    .format(key, baseline.name, loc.name), lang)
 
         # make sure .properties string substitutions match
         # keys that don't exist in one loc will already have been caught above
         for key in loc.subs:
             if key not in baseline.subs:
-                _log_error("String substitution for key '{0}' found in '{1}' but not in baseline {2}!".format(\
-                    key, loc.name, baseline.name), lang)
+                _log_error(
+                    "String substitution for key '{0}' found in '{1}' but not in baseline {2}!"
+                    .format(key, loc.name, baseline.name), lang)
             elif loc.subs[key] != baseline.subs[key]:
-                _log_error("String substitution for key '{0}' in '{1}' "
+                _log_error(
+                    "String substitution for key '{0}' in '{1}' "
                     "is not the same as baseline '{2}'. "
-                    "Substitution count and type must match.\n{1}:{3}\n{2}:{4}".format(\
-                    key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]), lang)
+                    "Substitution count and type must match.\n{1}:{3}\n{2}:{4}"
+                    .format(key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]), lang)
 
         for key in baseline.subs:
             if key not in loc.subs:
-                _log_error("String substitution for key '{0}' found in baseline {1} but not in '{2}'!".format(\
-                    key, baseline.name, loc.name), lang)
+                _log_error(
+                    "String substitution for key '{0}' found in baseline {1} but not in '{2}'!"
+                    .format(key, baseline.name, loc.name), lang)
             elif loc.subs[key] != baseline.subs[key]:
-                _log_error("String substitution for key '{0}' in baseline '{1}' "
+                _log_error(
+                    "String substitution for key '{0}' in baseline '{1}' "
                     "is not the same as '{2}'. "
-                    "Substitution count and type must match.\n{1}:{4}\n{2}:{3}".format(\
-                    key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
+                    "Substitution count and type must match.\n{1}:{4}\n{2}:{3}"
+                    .format(key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
 
     _log_normal("Done!")
     return any_errors
@@ -685,25 +737,42 @@ def validate_loc_files(manifest_dir, locales_only=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('manifest_dir',
-            help="Directory where chrome.manifest file is located.")
+    parser.add_argument(
+        'manifest_dir',
+        help="Directory where chrome.manifest file is located.")
     verbosity_group = parser.add_mutually_exclusive_group()
-    verbosity_group.add_argument('--verbose', '-v', default=False, action='store_true',
-            help="Verbose mode. Print more info about files and tests.")
-    verbosity_group.add_argument('--quiet', '-q', default=False, action='store_true',
-            help="Quiet mode. Don't print much, not even error info.")
+    verbosity_group.add_argument(
+        '--verbose', '-v',
+        default=False,
+        action='store_true',
+        help="Verbose mode. Print more info about files and tests.")
+    verbosity_group.add_argument(
+        '--quiet', '-q',
+        default=False,
+        action='store_true',
+        help="Quiet mode. Don't print much, not even error info.")
 
-    parser.add_argument('--locales-only', '-l', default=False, action='store_true',
-            help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
-                "Instead, point the script directly to your locale folder: "
-                "it will treat all subfolders as locales and parse them individually. "
-                "Mainly intended to allow easier unit-testing of checkloc itself; "
-                "you should usually *NOT* use this flag.")
+    parser.add_argument(
+        '--locales-only', '-l',
+        default=False,
+        action='store_true',
+        help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
+        "Instead, point the script directly to your locale folder: "
+        "it will treat all subfolders as locales and parse them individually. "
+        "Mainly intended to allow easier unit-testing of checkloc itself; "
+        "you should usually *NOT* use this flag.")
 
-    parser.add_argument('--group-by-language', default=False, action='store_true',
+    parser.add_argument(
+        '--group-by-language',
+        default=False,
+        action='store_true',
         help="Save output until the end and group messages by language, "
         "rather than as they are encountered.")
-    parser.add_argument('--json', default=False, action='store_true',
+
+    parser.add_argument(
+        '--json',
+        default=False,
+        action='store_true',
         help="Output messages as JSON rather than standard messages. "
         "Enabling this implies also enabling --group-by-language.")
 
