@@ -232,7 +232,7 @@ class LocalizationLanguage(object):
         loc_files = []
 
         # we assume that loc directries do not have sub-directories
-        for (root, dirs, files) in os.walk(self.loc_dir):
+        for (_, _, files) in os.walk(self.loc_dir):
             loc_files.extend(files)
 
         logging.info("Checking files in {0}".format(self.loc_dir))
@@ -278,7 +278,7 @@ class LocalizationLanguage(object):
                                 self.keys[key] = entity.content
 
                     except (etree.DTDParseError) as ex:
-                        (string, line, column, errlevel, place, errname, message) = self._extract_first_dtd_parse_error_info(ex)
+                        (_, line, column, _, _, _, message) = self._extract_first_dtd_parse_error_info(ex)
 
                         # get the error line so we can show the user where the problem may be
                         error_line = linecache.getline(file_path, int(line)).strip()
@@ -585,7 +585,7 @@ class ManifestSet(object):
         # now calculate the locale subdirectories
         langs = {}
         for ld in self.loc_base_dirs:
-            for (root, dirs, files) in os.walk(ld):
+            for (_, dirs, _) in os.walk(ld):
                 for d in dirs:
                     langs[d] = os.path.join(ld, d)
 
@@ -660,7 +660,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
         return True
 
     for ld in loc_dirs:
-        for (root, dirs, files) in os.walk(ld):
+        for (_, dirs, _) in os.walk(ld):
             for d in dirs:
                 langs[d] = os.path.join(ld, d)
 
