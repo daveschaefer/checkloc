@@ -102,11 +102,11 @@ def _log_message(msg, lang, log_func):
 
     msg_out = "({0}) {1}".format(lang, msg)
 
-    if (group_by_language):
+    if group_by_language:
         if lang not in messages_by_language:
             messages_by_language[lang] = []
 
-        if (output_json):
+        if output_json:
             if log_func == logging.error:
                 msg_out = "ERROR: " + msg_out
             elif log_func == warnings.warn:
@@ -214,7 +214,7 @@ class LocalizationLanguage(object):
         # <string>:10:17:FATAL:PARSER:ERR_VALUE_REQUIRED: Entity value required
         line = str(err.error_log[0]).strip()
         match = re.match(self.DTD_PARSE_ERROR, line)
-        if (match):
+        if match:
             (string, line, column, errlevel, place, errname, message) = match.groups()
             return [string, line, column, errlevel, place, errname, message.strip()]
 
@@ -250,7 +250,7 @@ class LocalizationLanguage(object):
                         "File '{0}' contains Byte Order Marker; localization files should not contain BOM."
                         .format(file_path))
 
-            if (file_path.endswith('.dtd')):
+            if file_path.endswith('.dtd'):
                 with open(file_path, 'r') as openfile:
                     try:
                         dtd = etree.DTD(openfile)
@@ -299,7 +299,7 @@ class LocalizationLanguage(object):
                             "Could not parse {0}: {1}"
                             .format(file_path, error_message))
 
-            elif (file_path.endswith('.properties')):
+            elif file_path.endswith('.properties'):
                 self._parse_properties_file(file_path)
             else:
                 # not neccesarily a failure - there may just be extra files lying around.
@@ -322,7 +322,7 @@ class LocalizationLanguage(object):
         with open(file_path, 'r') as openfile:
             data = openfile.read()
 
-            if (len(data) < 1):
+            if len(data) < 1:
                 _log_warning("{0} does not contain any lines".format(file_path), self.name)
                 return
 
@@ -335,7 +335,7 @@ class LocalizationLanguage(object):
                 numeric_subs_list = [] # list of numbered string substitutions, like %1$S.
                 regular_subs = 0
                 match = self.PROP_LINE.match(line)
-                if (match):
+                if match:
                     key = file_name + self.LSEP + match.group(1)
                     value = match.group(2)
                     if key in self.keys:
@@ -450,7 +450,7 @@ class ManifestSet(object):
             return
 
         manifest = os.path.join(self.manifest_dir, 'chrome.manifest')
-        if not (os.path.exists(manifest)):
+        if not os.path.exists(manifest):
             _log_error(
                 "File chrome.manifest does not exist in {0} ; cannot validate chrome.manifest. "
                 "If you wish to skip validation of chrome.manifest please specify the "
@@ -482,7 +482,7 @@ class ManifestSet(object):
 
                         self.loc_base_dirs[base_dir] = True
 
-                        if (locale not in self.manifest_paths):
+                        if locale not in self.manifest_paths:
                             self.manifest_paths[locale] = locale_absdir
                         if locale not in self.manifest_lines:
                             self.manifest_lines[locale] = i
@@ -500,7 +500,7 @@ class ManifestSet(object):
 
         # also parse install.rdf
         install_rdf = os.path.abspath(os.path.join(self.manifest_dir, 'install.rdf'))
-        if not (os.path.exists(install_rdf)):
+        if not os.path.exists(install_rdf):
             _log_error(
                 "File install.rdf does not exist in {0} ; cannot validate. "
                 "If you wish to skip validation please specify the "
@@ -532,12 +532,12 @@ class ManifestSet(object):
         # check every chrome.manifest entry to make sure a locale folder exists
         for locale in self.manifest_paths:
             locale_path = self.manifest_paths[locale]
-            if not (os.path.exists(locale_path)):
+            if not os.path.exists(locale_path):
                 _log_error(
                     "Locale folder '{0}' is specified in chrome.manifest "
                     "line {1}, but {2} does not exist!"
                     .format(locale, self.manifest_lines[locale], locale_path), locale)
-            elif not (os.path.isdir(locale_path)):
+            elif not os.path.isdir(locale_path):
                 _log_error(
                     "Locale folder '{0}' is specified in chrome.manifest "
                     "line {1}, but {2} is not a folder!"
@@ -558,19 +558,19 @@ class ManifestSet(object):
 
         # check every install.rdf entry to make sure a locale folder exists
         for locale in self.rdf_locs:
-            if (locale not in self.manifest_paths):
+            if locale not in self.manifest_paths:
                 _log_warning(
                     "Locale '{0}' is specified in install.rdf "
                     "but is not specified in chrome.manifest."
                     .format(locale), locale)
             else:
                 locale_path = self.manifest_paths[locale]
-                if not (os.path.exists(locale_path)):
+                if not os.path.exists(locale_path):
                     _log_warning(
                         "Locale folder '{0}' is specified in install.rdf "
                         "line {1}, but {2} does not exist!"
                         .format(locale, self.manifest_lines[locale], locale_path), locale)
-                elif not (os.path.isdir(locale_path)):
+                elif not os.path.isdir(locale_path):
                     _log_warning(
                         "Locale folder '{0}' is specified in install.rdf "
                         "line {1}, but {2} is not a folder!"
@@ -597,12 +597,12 @@ class ManifestSet(object):
             if lang in self.manifest_paths:
                 dir_path = os.path.abspath(os.path.join(self.manifest_paths[lang], '..'))
 
-            if (lang not in self.manifest_paths):
+            if lang not in self.manifest_paths:
                 _log_error(
                     "Locale folder '{0}' exists in {1}, but no corresponding entry "
                     "exists in the chrome.manifest."
                     .format(lang, dir_path), lang)
-            if (lang not in self.rdf_locs):
+            if lang not in self.rdf_locs:
                 _log_warning(
                     "Locale folder '{0}' exists in {1}, but no corresponding entry "
                     "exists in install.rdf."
@@ -635,12 +635,12 @@ def validate_loc_files(manifest_dir, locales_only=False):
     _log_normal("Starting Localization tests...")
 
     manifest_dir = os.path.abspath(manifest_dir)
-    if not (os.path.exists(manifest_dir)):
+    if not os.path.exists(manifest_dir):
         _log_error("The localization directory {0} does not exist!".format(manifest_dir))
         return True
     logging.info("Loc directory {0} exists.".format(manifest_dir))
 
-    if not (os.path.isdir(manifest_dir)):
+    if not os.path.isdir(manifest_dir):
         _log_error("{0} is not a directory!".format(manifest_dir))
         return True
     logging.info("{0} is a directory.".format(manifest_dir))
@@ -649,7 +649,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
 
 
     loc_dirs = []
-    if (locales_only):
+    if locales_only:
         loc_dirs.append(manifest_dir) # script should be pointed to main locale folder instead
     else:
         ms.validate_manifests()
@@ -664,7 +664,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
             for d in dirs:
                 langs[d] = os.path.join(ld, d)
 
-    if (len(langs) < 1):
+    if len(langs) < 1:
         _log_error("Did not find any language folders inside {0}!".format(loc_dirs))
         return True
     _log_normal("Found {0} languages: {1}.".format(len(langs), langs.keys()))
@@ -679,11 +679,11 @@ def validate_loc_files(manifest_dir, locales_only=False):
     parse_errors = baseline.get_loc_keys()
     any_errors = any_errors or parse_errors
 
-    if (len(baseline.keys) < 1):
+    if len(baseline.keys) < 1:
         _log_error("Did not find any keys in '{0}'!".format(baseline.name))
         return True
 
-    if (any_errors):
+    if any_errors:
         return True # error message has already been printed above
 
     _log_normal(
@@ -698,13 +698,13 @@ def validate_loc_files(manifest_dir, locales_only=False):
         any_errors = any_errors or parse_errors
 
         for key in loc.keys:
-            if (key not in baseline.keys):
+            if key not in baseline.keys:
                 _log_error(
                     "Key '{0}' in '{1}' but not in '{2}'"
                     .format(key, loc.name, baseline.name), lang)
 
         for key in baseline.keys:
-            if (key not in loc.keys):
+            if key not in loc.keys:
                 _log_error(
                     "Key '{0}' in '{1}' but not in '{2}'"
                     .format(key, baseline.name, loc.name), lang)
@@ -783,9 +783,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     loglevel = logging.WARNING
-    if (args.verbose):
+    if args.verbose:
         loglevel = logging.INFO
-    elif (args.quiet):
+    elif args.quiet:
         loglevel = logging.CRITICAL
 
     logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
@@ -795,7 +795,7 @@ if __name__ == '__main__':
     warnings.formatwarning=_format_warning
 
     locales_only = False
-    if (args.locales_only):
+    if args.locales_only:
         locales_only = True
 
     if args.json:
@@ -807,15 +807,15 @@ if __name__ == '__main__':
 
     errors = validate_loc_files(args.manifest_dir, locales_only=locales_only)
 
-    if (args.group_by_language):
-        if (args.json):
+    if args.group_by_language:
+        if args.json:
             print(json.dumps(messages_by_language, sort_keys=True, indent=4))
         else:
             for lang in sorted(messages_by_language):
                 for log_call in messages_by_language[lang]:
                     log_call()
 
-    if (errors):
+    if errors:
         sys.exit(1)
     else:
         sys.exit(0)
