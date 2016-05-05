@@ -698,7 +698,7 @@ def validate_loc_files(manifest_dir, locales_only=False):
         any_errors = any_errors or parse_errors
 
         for key in loc.keys:
-            if (key not in baseline.keys):
+            if key not in baseline.keys:
                 _log_error(
                     "Key '{0}' in '{1}' but not in '{2}'"
                     .format(key, loc.name, baseline.name), lang)
