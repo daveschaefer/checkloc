@@ -76,11 +76,14 @@ class TestChecklocModule(unittest.TestCase):
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
                     errors = validate_loc_files(target_dir, locales_only=True)
-                    self.assertFalse(errors,
+                    self.assertFalse(
+                        errors,
                         "Warning test '{0}' should not generate any errors.".format(d))
-                    self.assertTrue(len(w) > 0,
+                    self.assertTrue(
+                        len(w) > 0,
                         "Warning test '{0}' should generate at least one warning.".format(d))
-                    self.assertTrue(issubclass(w[-1].category, Warning),
+                    self.assertTrue(
+                        issubclass(w[-1].category, Warning),
                         "Warning test '{0}' should generate a warning of type Warning.".format(d))
                     # with catch_warnings() the behaviour changes so warnings
                     # are no longer printed to stdout.
@@ -91,13 +94,15 @@ class TestChecklocModule(unittest.TestCase):
             elif d.startswith(MANIFEST_VALID_NAME):
                 print "-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d)
                 errors = validate_loc_files(target_dir)
-                self.assertFalse(errors,
+                self.assertFalse(
+                    errors,
                     "Valid manifest test '{0}' should not generate any errors.".format(d))
                 i += 1
             elif d.startswith(MANIFEST_INVALID_NAME):
                 print "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d)
                 errors = validate_loc_files(target_dir)
-                self.assertTrue(errors,
+                self.assertTrue(
+                    errors,
                     "Invalid manifest test '{0}' should generate at least one error.".format(d))
                 i += 1
             elif d.startswith(MANIFEST_WARNING_NAME):
@@ -105,11 +110,14 @@ class TestChecklocModule(unittest.TestCase):
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
                     errors = validate_loc_files(target_dir)
-                    self.assertFalse(errors,
+                    self.assertFalse(
+                        errors,
                         "Warning test '{0}' should not generate any errors.".format(d))
-                    self.assertTrue(len(w) > 0,
+                    self.assertTrue(
+                        len(w) > 0,
                         "Warning test '{0}' should generate at least one warning.".format(d))
-                    self.assertTrue(issubclass(w[-1].category, Warning),
+                    self.assertTrue(
+                        issubclass(w[-1].category, Warning),
                         "Warning test '{0}' should generate a warning of type Warning.".format(d))
                     # with catch_warnings() the behaviour changes so warnings
                     # are no longer printed to stdout.
@@ -160,10 +168,16 @@ class TestChecklocModule(unittest.TestCase):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
     verbosity_group = parser.add_mutually_exclusive_group()
-    verbosity_group.add_argument('--verbose', '-v', default=False, action='store_true',
-            help="Verbose mode. Print more info while testing.")
-    verbosity_group.add_argument('--quiet', '-q', default=False, action='store_true',
-            help="Quiet mode. Don't print much, not even error info.")
+    verbosity_group.add_argument(
+        '--verbose', '-v',
+        default=False,
+        action='store_true',
+        help="Verbose mode. Print more info while testing.")
+    verbosity_group.add_argument(
+        '--quiet', '-q',
+        default=False,
+        action='store_true',
+        help="Quiet mode. Don't print much, not even error info.")
 
     args = parser.parse_args()
 
