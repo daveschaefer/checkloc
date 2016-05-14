@@ -1,8 +1,8 @@
 # Checkloc
 
-Validate a set of [Mozilla-style localization files](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localizing_an_extension) (DTD and string bundle) to make sure all languages have the same keys with the right syntax.
+Validate [localizations](https://en.wikipedia.org/wiki/Language_localization) for your Firefox or SeaMonkey extension.
 
-This script can be run before deploying your Firefox or SeaMonkey extension to test that localization data is valid. It compares the localization keys and location and checks the syntax of every file and localization entry.
+Checkloc is a localization [linter](https://en.wikipedia.org/wiki/Lint_%28software%29). It scans a set of [Mozilla-style localization files](https://developer.mozilla.org/en-US/docs/Mozilla/Localization/Localizing_an_extension) (`.dtd`, `.rdf`, and `.properties` string bundles) to make sure all languages have the same strings with the right syntax. It compares the string names and locations, and checks the syntax of every file and localization entry.
 
 
 ## Requirements
