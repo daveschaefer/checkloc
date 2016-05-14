@@ -19,6 +19,7 @@ Run unit tests for the checkloc module.
 
 from __future__ import print_function
 
+from abc import ABCMeta
 import argparse
 import logging
 import os
@@ -36,31 +37,110 @@ else:
 # relative directory that contains test data
 TEST_DATA_SUBDIR = 'test_data'
 
-# start a directory with this name
-# to signify it contains only valid data and should parse without error
-VALID_DATA_NAME = 'valid'
+class IChecklocDataTester(object):
+    """
+    The interface for testing checkloc behaviour
+    using sets of valid and invalid localization test data.
+    """
+    __metaclass__ = ABCMeta
 
-# start a directory with this name
-# to signify it contains invalid data that should be caught when parsed
-INVALID_DATA_NAME = 'invalid'
+    LOCALES_ONLY = False
 
-# check that warnings are generated
-WARNING_NAME = 'warn'
+    # start a directory with this name
+    # to signify it contains only valid data and should parse without error
+    VALID_DATA_NAME = 'valid'
 
-# to run tests that include parsing the manifest files
-# chrome.manifest and install.rdf
-# start the folder with these prefixes
-MANIFEST_NAME = 'manifest_'
-MANIFEST_INVALID_NAME = MANIFEST_NAME + INVALID_DATA_NAME
-MANIFEST_VALID_NAME = MANIFEST_NAME + VALID_DATA_NAME
-MANIFEST_WARNING_NAME = MANIFEST_NAME + WARNING_NAME
+    # start a directory with this name
+    # to signify it contains invalid data that should be caught when parsed
+    INVALID_DATA_NAME = 'invalid'
 
+    # start a directory with this name
+    # to check that warnings are generated
+    WARNING_NAME = 'warn'
+
+    def __init__(self, tester):
+        self.tester = tester
+
+    def has_test_data_in_dir(self, full_path):
+        """
+        Return True if the given directory name would contain test data
+        for this class, and False otherwise.
+        """
+        top_dir = os.path.basename(full_path)
+        if (top_dir.startswith(self.VALID_DATA_NAME) or
+                top_dir.startswith(self.INVALID_DATA_NAME) or
+                top_dir.startswith(self.WARNING_NAME)):
+            return True
+
+        return False
+
+    def validate(self, full_path, i=0):
+        """
+        Run validation tests against the data in the given directory.
+        """
+        top_dir = os.path.basename(full_path)
+        if top_dir.startswith(self.VALID_DATA_NAME):
+            print("-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, full_path))
+            checker = checkloc.CheckLoc(manifest_dir=full_path, locales_only=self.LOCALES_ONLY)
+            errors = checker.validate_loc_files()
+            self.tester.assertFalse(errors)
+        elif top_dir.startswith(self.INVALID_DATA_NAME):
+            print(
+                "-------\n[{0}.] Checking invalid data in '{1}'; should find an error..."
+                .format(i, full_path))
+            checker = checkloc.CheckLoc(manifest_dir=full_path, locales_only=self.LOCALES_ONLY)
+            errors = checker.validate_loc_files()
+            self.tester.assertTrue(errors)
+        elif top_dir.startswith(self.WARNING_NAME):
+            print(
+                "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning..."
+                .format(i, full_path))
+            # capture all warnings so we can verify that they happen
+            with warnings.catch_warnings(record=True) as w:
+                checker = checkloc.CheckLoc(manifest_dir=full_path, locales_only=self.LOCALES_ONLY)
+                errors = checker.validate_loc_files()
+                self.tester.assertFalse(
+                    errors,
+                    "Warning test '{0}' should not generate any errors.".format(full_path))
+                self.tester.assertTrue(
+                    len(w) > 0,
+                    "Warning test '{0}' should generate at least one warning.".format(full_path))
+                self.tester.assertTrue(
+                    issubclass(w[-1].category, Warning),
+                    "Warning test '{0}' should generate a warning of type Warning."
+                    .format(full_path))
+                # with catch_warnings() the behaviour changes so warnings
+                # are no longer printed to stdout.
+                # print them to stdout so users can still see what is going on.
+                for warning in w:
+                    logging.warning(warning.message)
+        else:
+            raise Exception(
+                "validate() called with '{0}' - this is not a valid type of data!"
+                .format(full_path))
+
+class LocaleDataTester(IChecklocDataTester):
+    """
+    Test localization data contained only in stand-alone locale folders.
+    """
+    LOCALES_ONLY = True
+
+class ManifestDataTester(IChecklocDataTester):
+    """
+    Test localization data that uses a full set of manifest files.
+    """
+    LOCALES_ONLY = False
+
+    MANIFEST_NAME = 'manifest_'
+
+    VALID_DATA_NAME = MANIFEST_NAME + IChecklocDataTester.VALID_DATA_NAME
+    INVALID_DATA_NAME = MANIFEST_NAME + IChecklocDataTester.INVALID_DATA_NAME
+    WARNING_NAME = MANIFEST_NAME + IChecklocDataTester.WARNING_NAME
 
 class TestChecklocModule(unittest.TestCase):
     """
     Run test cases against the checkloc module to make sure it is functioning correctly.
     """
-
     def setUp(self):
         """
         Set up tests to run.
@@ -71,91 +151,18 @@ class TestChecklocModule(unittest.TestCase):
 
     def test_valid_data_is_parsed_and_invalid_data_is_caught(self):
         dirs = os.listdir(self.test_data_dir)
+        locale_tester = LocaleDataTester(self)
+        manifest_tester = ManifestDataTester(self)
         i = 1
-        for d in dirs:
-            target_dir = os.path.join(self.test_data_dir, d)
 
-            if d.startswith(VALID_DATA_NAME):
-                print("-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d))
-                checker = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
-                errors = checker.validate_loc_files()
-                self.assertFalse(errors)
-                i += 1
-            elif d.startswith(INVALID_DATA_NAME):
-                print(
-                    "-------\n[{0}.] Checking invalid data in '{1}'; should find an error..."
-                    .format(i, d))
-                checker = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
-                errors = checker.validate_loc_files()
-                self.assertTrue(errors)
-                i += 1
-            elif d.startswith(WARNING_NAME):
-                print(
-                    "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning..."
-                    .format(i, d))
-                # capture all warnings so we can verify that they happen
-                with warnings.catch_warnings(record=True) as w:
-                    checker = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
-                    errors = checker.validate_loc_files()
-                    self.assertFalse(
-                        errors,
-                        "Warning test '{0}' should not generate any errors.".format(d))
-                    self.assertTrue(
-                        len(w) > 0,
-                        "Warning test '{0}' should generate at least one warning.".format(d))
-                    self.assertTrue(
-                        issubclass(w[-1].category, Warning),
-                        "Warning test '{0}' should generate a warning of type Warning.".format(d))
-                    # with catch_warnings() the behaviour changes so warnings
-                    # are no longer printed to stdout.
-                    # print them to stdout so users can still see what is going on.
-                    for warning in w:
-                        logging.warning(warning.message)
-                i += 1
-            elif d.startswith(MANIFEST_VALID_NAME):
-                print(
-                    "-------\n[{0}.] Checking manifest data in '{1}'; should be valid..."
-                    .format(i, d))
-                checker = checkloc.CheckLoc(manifest_dir=target_dir)
-                errors = checker.validate_loc_files()
-                self.assertFalse(
-                    errors,
-                    "Valid manifest test '{0}' should not generate any errors.".format(d))
-                i += 1
-            elif d.startswith(MANIFEST_INVALID_NAME):
-                print(
-                    "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error..."
-                    .format(i, d))
-                checker = checkloc.CheckLoc(manifest_dir=target_dir)
-                errors = checker.validate_loc_files()
-                self.assertTrue(
-                    errors,
-                    "Invalid manifest test '{0}' should generate at least one error.".format(d))
-                i += 1
-            elif d.startswith(MANIFEST_WARNING_NAME):
-                print(
-                    "-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning..."
-                    .format(i, d))
-                # capture all warnings so we can verify that they happen
-                with warnings.catch_warnings(record=True) as w:
-                    checker = checkloc.CheckLoc(manifest_dir=target_dir)
-                    errors = checker.validate_loc_files()
-                    self.assertFalse(
-                        errors,
-                        "Warning test '{0}' should not generate any errors.".format(d))
-                    self.assertTrue(
-                        len(w) > 0,
-                        "Warning test '{0}' should generate at least one warning.".format(d))
-                    self.assertTrue(
-                        issubclass(w[-1].category, Warning),
-                        "Warning test '{0}' should generate a warning of type Warning.".format(d))
-                    # with catch_warnings() the behaviour changes so warnings
-                    # are no longer printed to stdout.
-                    # print them to stdout so users can still see what is going on.
-                    for warning in w:
-                        logging.warning(warning.message)
-                i += 1
+        for directory in dirs:
+            target_dir = os.path.join(self.test_data_dir, directory)
+            if locale_tester.has_test_data_in_dir(target_dir):
+                locale_tester.validate(target_dir, i)
+            elif manifest_tester.has_test_data_in_dir(target_dir):
+                manifest_tester.validate(target_dir, i)
             # ignore other directories
+            i += 1
 
     def test_nonexistent_directories_raise_an_error(self):
         non_existent_dir = os.path.join(self.test_data_dir, 'null_empty')
