@@ -26,6 +26,13 @@ Point the script at the directory that contains your extension's ```chrome.manif
 
 Or run ```>python checkloc/checkloc.py --help```
 
+### Running the tests
+
+```>python -m checkloc.test.test_checkloc```
+
+or
+
+```>python checkloc/test/test_checkloc.py```
 
 ## Examples
 
