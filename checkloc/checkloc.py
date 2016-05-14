@@ -639,16 +639,17 @@ class CheckLoc(object):
 
         return args
 
-    def __init__(self, group_by_language=False, json=False, locales_only=False, manifest_dir=None):
+    def __init__(self, group_by_language=False, output_json=False, locales_only=False,
+                 manifest_dir=None):
         self.any_errors = False
         self.messages_by_language = {}
 
         self.group_by_language = group_by_language
         self.locales_only = locales_only
         self.manifest_dir = manifest_dir
-        self.output_json = json
+        self.output_json = output_json
 
-        if json:
+        if output_json:
             self.group_by_language = True
 
     def _log_error(self, msg, lang=None):
