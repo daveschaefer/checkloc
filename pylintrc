@@ -11,3 +11,6 @@ method-name-hint=[a-z_][a-z0-9_]{2,100}$
 # don't force test methods to have a docstring;
 # the method name should fully document what it does
 no-docstring-rgx=(__.*__|test_.*)
+
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,40}|(__.*__))$
+class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,40}|(__.*__))$
