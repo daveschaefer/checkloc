@@ -283,7 +283,7 @@ class LocalizationLanguage(object):
                             # with a trailing ?
                             pmatch = re.match(r'%([0-9]+\$)?S', value[pos:])
 
-                            if (pos + 1 < len(value)) and value[pos+1] == '%':
+                            if (pos + 1 < len(value)) and value[pos + 1] == '%':
                                 pos += 1 # double %% for escape sequence; print actual %
                             elif pmatch:
                                 # advance 1 char for the trailing S
@@ -304,7 +304,7 @@ class LocalizationLanguage(object):
                                 valid = False
                                 break
 
-                            pos = value.find('%', pos+1)
+                            pos = value.find('%', pos + 1)
 
                         if valid:
                             self.keys[key] = value
