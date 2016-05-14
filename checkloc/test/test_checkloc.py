@@ -24,16 +24,15 @@ import sys
 import unittest
 import warnings
 
-# prepend parent directory so we can import the checkloc module
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from .. import checkloc
 
-from checkloc import CheckLoc
+# relative directory that contains test data
+TEST_DATA_SUBDIR = 'test_data'
 
-TEST_DATA_DIR = 'test/test_data'
 # start a directory with this name
 # to signify it contains only valid data and should parse without error
 VALID_DATA_NAME = 'valid'
+
 # start a directory with this name
 # to signify it contains invalid data that should be caught when parsed
 INVALID_DATA_NAME = 'invalid'
@@ -55,30 +54,37 @@ class TestChecklocModule(unittest.TestCase):
     Run test cases against the checkloc module to make sure it is functioning correctly.
     """
 
+    def setUp(self):
+        """
+        Set up tests to run.
+        """
+        self.test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+            TEST_DATA_SUBDIR)
+
     def test_valid_data_is_parsed_and_invalid_data_is_caught(self):
-        dirs = os.listdir(TEST_DATA_DIR)
+        dirs = os.listdir(self.test_data_dir)
         i = 1
         for d in dirs:
-            target_dir = os.path.join(TEST_DATA_DIR, d)
+            target_dir = os.path.join(self.test_data_dir, d)
 
             if d.startswith(VALID_DATA_NAME):
                 print "-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d)
-                checkloc = CheckLoc(locales_only=True, manifest_dir=target_dir)
-                errors = checkloc.validate_loc_files()
+                ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
+                errors = ch.validate_loc_files()
                 self.assertFalse(errors)
                 i += 1
             elif d.startswith(INVALID_DATA_NAME):
                 print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
-                checkloc = CheckLoc(locales_only=True, manifest_dir=target_dir)
-                errors = checkloc.validate_loc_files()
+                ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
+                errors = ch.validate_loc_files()
                 self.assertTrue(errors)
                 i += 1
             elif d.startswith(WARNING_NAME):
                 print "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning...".format(i, d)
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
-                    checkloc = CheckLoc(locales_only=True, manifest_dir=target_dir)
-                    errors = checkloc.validate_loc_files()
+                    ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
+                    errors = ch.validate_loc_files()
                     self.assertFalse(
                         errors,
                         "Warning test '{0}' should not generate any errors.".format(d))
@@ -96,16 +102,16 @@ class TestChecklocModule(unittest.TestCase):
                 i += 1
             elif d.startswith(MANIFEST_VALID_NAME):
                 print "-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d)
-                checkloc = CheckLoc(manifest_dir=target_dir)
-                errors = checkloc.validate_loc_files()
+                ch = checkloc.CheckLoc(manifest_dir=target_dir)
+                errors = ch.validate_loc_files()
                 self.assertFalse(
                     errors,
                     "Valid manifest test '{0}' should not generate any errors.".format(d))
                 i += 1
             elif d.startswith(MANIFEST_INVALID_NAME):
                 print "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d)
-                checkloc = CheckLoc(manifest_dir=target_dir)
-                errors = checkloc.validate_loc_files()
+                ch = checkloc.CheckLoc(manifest_dir=target_dir)
+                errors = ch.validate_loc_files()
                 self.assertTrue(
                     errors,
                     "Invalid manifest test '{0}' should generate at least one error.".format(d))
@@ -114,8 +120,8 @@ class TestChecklocModule(unittest.TestCase):
                 print "-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning...".format(i, d)
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
-                    checkloc = CheckLoc(manifest_dir=target_dir)
-                    errors = checkloc.validate_loc_files()
+                    ch = checkloc.CheckLoc(manifest_dir=target_dir)
+                    errors = ch.validate_loc_files()
                     self.assertFalse(
                         errors,
                         "Warning test '{0}' should not generate any errors.".format(d))
@@ -134,45 +140,45 @@ class TestChecklocModule(unittest.TestCase):
             # ignore other directories
 
     def test_nonexistent_directories_raise_an_error(self):
-        non_existent_dir = os.path.join(TEST_DATA_DIR, 'null_empty')
+        non_existent_dir = os.path.join(self.test_data_dir, 'null_empty')
         self.assertFalse(os.path.exists(non_existent_dir), "Test setup: directory {0} should not exist".format(non_existent_dir))
-        checkloc = CheckLoc(locales_only=True, manifest_dir=non_existent_dir)
-        errors = checkloc.validate_loc_files()
+        ch = checkloc.CheckLoc(locales_only=True, manifest_dir=non_existent_dir)
+        errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
     def test_passing_non_directory_raises_an_error(self):
-        file_name = os.path.join(TEST_DATA_DIR, 'test_file.txt')
+        file_name = os.path.join(self.test_data_dir, 'test_file.txt')
         self.assertTrue(os.path.exists(file_name), "Test setup: file {0} exists".format(file_name))
         self.assertFalse(os.path.isdir(file_name), "Test setup: file {0} is not a directory".format(file_name))
-        checkloc = CheckLoc(locales_only=True, manifest_dir=file_name)
-        errors = checkloc.validate_loc_files()
+        ch = checkloc.CheckLoc(locales_only=True, manifest_dir=file_name)
+        errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
     def test_finding_no_language_folders_raises_an_error(self):
-        empty_dir = os.path.join(TEST_DATA_DIR, 'other_no_lang_folders')
+        empty_dir = os.path.join(self.test_data_dir, 'other_no_lang_folders')
         self.assertTrue(os.path.exists(empty_dir), "Test setup: directory {0} should exist".format(empty_dir))
         self.assertTrue(os.path.isdir(empty_dir), "Test setup: {0} is a directory".format(empty_dir))
-        checkloc = CheckLoc(locales_only=True, manifest_dir=empty_dir)
-        errors = checkloc.validate_loc_files()
+        ch = checkloc.CheckLoc(locales_only=True, manifest_dir=empty_dir)
+        errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
     def test_finding_no_baseline_folder_raises_an_error(self):
-        base_dir = os.path.join(TEST_DATA_DIR, 'other_no_baseline')
+        base_dir = os.path.join(self.test_data_dir, 'other_no_baseline')
         self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
         self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
-        checkloc = CheckLoc(locales_only=True, manifest_dir=base_dir)
-        errors = checkloc.validate_loc_files()
+        ch = checkloc.CheckLoc(locales_only=True, manifest_dir=base_dir)
+        errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
     def test_finding_no_loc_data_raises_an_error(self):
         # by this we mean: no Mozilla-style localization data of any kind.
         # the folder could contain anything, but it's not in the format we're expecting.
         # the script should still fail gracefully in this case.
-        base_dir = TEST_DATA_DIR
+        base_dir = self.test_data_dir
         self.assertTrue(os.path.exists(base_dir), "Test setup: directory {0} should exist".format(base_dir))
         self.assertTrue(os.path.isdir(base_dir), "Test setup: {0} is a directory".format(base_dir))
-        checkloc = CheckLoc(manifest_dir=base_dir)
-        errors = checkloc.validate_loc_files()
+        ch = checkloc.CheckLoc(manifest_dir=base_dir)
+        errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
 
