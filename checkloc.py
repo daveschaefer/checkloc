@@ -72,18 +72,17 @@ class LocalizationLanguage(object):
     #   name=string
     #   name:string
     # Assumptions: both comments and entries exist only on a single line.
-    PROP_COMMENT = re.compile('^\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.MULTILINE)
-    PROP_SEP = re.compile('[\n\r\f]')
+    PROP_COMMENT = re.compile(r'^\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.MULTILINE)
+    PROP_SEP = re.compile(r'[\n\r\f]')
     # almost any character is a valid .properties key
     # except : and = , which note the transition to a value,
     # and spaces.
-    # note that \\\\ is used in the regex to specify a single \ .
     # Because we parse and remove PROP_COMMENTs first, that regex will catch any
     # '#' or '!' characters that are found as the first non-whitespace part of a line.
     # This means we can allow # and ! inside this regex and it's not as complex.
-    PROP_LINE = re.compile('^\s*([A-Za-z0-9_.\-+\\\\{}\[\]!@#$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
+    PROP_LINE = re.compile(r'^\s*([A-Za-z0-9_.\-+\\{}\[\]!@#$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
 
-    DTD_PARSE_ERROR = re.compile('([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
+    DTD_PARSE_ERROR = re.compile(r'([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
     # Firefox does not allow more than ten string substitution parameters, for performance reasons.
     # For details see nsStringBundle.cpp
@@ -282,7 +281,7 @@ class LocalizationLanguage(object):
                             # we don't save the (n$) group for anything;
                             # we simply specify a group so we can make the entire group optional
                             # with a trailing ?
-                            pmatch = re.match('%([0-9]+\$)?S', value[x:])
+                            pmatch = re.match(r'%([0-9]+\$)?S', value[x:])
 
                             if (x + 1 < len(value)) and value[x+1] == '%':
                                 x += 1 # double %% for escape sequence; print actual %
@@ -343,7 +342,7 @@ class ManifestSet(object):
     # start of string used to register locale packages - see
     # https://developer.mozilla.org/en-US/docs/Chrome_Registration#locale
     MANIFEST_LOCALE_START = 'locale'
-    MANIFEST_LOCALE_LINE = re.compile('^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
+    MANIFEST_LOCALE_LINE = re.compile(r'^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
     def __init__(self, manifest_dir, log_error, log_warning):
         """
