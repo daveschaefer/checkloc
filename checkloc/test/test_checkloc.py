@@ -25,7 +25,13 @@ import os
 import unittest
 import warnings
 
-from .. import checkloc
+# allow importing and running both as a package and from the command line
+if __package__ is None:
+    import sys
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    import checkloc
+else:
+    from .. import checkloc
 
 # relative directory that contains test data
 TEST_DATA_SUBDIR = 'test_data'
