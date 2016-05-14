@@ -276,35 +276,35 @@ class LocalizationLanguage(object):
                     # 3. %S or %n$S , where n is a number
                     elif '%' in value:
                         valid = True
-                        x = value.find('%')
-                        while x < len(value) and x != -1:
+                        pos = value.find('%')
+                        while pos < len(value) and pos != -1:
                             # we don't save the (n$) group for anything;
                             # we simply specify a group so we can make the entire group optional
                             # with a trailing ?
-                            pmatch = re.match(r'%([0-9]+\$)?S', value[x:])
+                            pmatch = re.match(r'%([0-9]+\$)?S', value[pos:])
 
-                            if (x + 1 < len(value)) and value[x+1] == '%':
-                                x += 1 # double %% for escape sequence; print actual %
+                            if (pos + 1 < len(value)) and value[pos+1] == '%':
+                                pos += 1 # double %% for escape sequence; print actual %
                             elif pmatch:
                                 # advance 1 char for the trailing S
                                 # plus however many chars make up the numerical reference (if any)
-                                x += 1
+                                pos += 1
                                 if pmatch.group(1):
                                     numeric_subs_list.append(int(pmatch.group(1).replace('$', '')))
                                     logging.info(
                                         "String substitution found. %s", numeric_subs_list)
-                                    x += len(pmatch.group(1))
+                                    pos += len(pmatch.group(1))
                                 else:
                                     regular_subs += 1
                             else:
                                 self._log_error(
                                     "key '{0}' contains improper use of % in {1}. "
                                     "Position marked by ^ below:\n{2}\n{3}"
-                                    .format(key, file_path, value, "{0}^".format(" " * x)))
+                                    .format(key, file_path, value, "{0}^".format(" " * pos)))
                                 valid = False
                                 break
 
-                            x = value.find('%', x+1)
+                            pos = value.find('%', pos+1)
 
                         if valid:
                             self.keys[key] = value
