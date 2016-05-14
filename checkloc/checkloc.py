@@ -445,8 +445,8 @@ class ManifestSet(object):
             # contains a 'None' entry, even if it also contains
             # other valid mappings.
             # Therefore explicitly add only the namespaces we need
-            ns = {'em': 'http://www.mozilla.org/2004/em-rdf#'}
-            for locale in root.findall('.//em:locale', ns):
+            namespace = {'em': 'http://www.mozilla.org/2004/em-rdf#'}
+            for locale in root.findall('.//em:locale', namespace):
                 loc = locale.text
                 if loc not in self.rdf_locs:
                     self.rdf_locs[loc] = True
