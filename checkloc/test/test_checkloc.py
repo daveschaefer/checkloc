@@ -22,7 +22,6 @@ from __future__ import print_function
 import argparse
 import logging
 import os
-import sys
 import unittest
 import warnings
 
