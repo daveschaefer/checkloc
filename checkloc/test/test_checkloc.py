@@ -181,9 +181,9 @@ class TestChecklocModule(unittest.TestCase):
 
     def test_passing_manifest_file_rather_than_manifest_directory_succeeds(self):
         manifest_file = os.path.join(
-                self.test_data_dir,
-                'manifest_valid_data',
-                'chrome.manifest')
+            self.test_data_dir,
+            'manifest_valid_data',
+            'chrome.manifest')
         self.assertTrue(
             os.path.exists(manifest_file),
             "Test setup: manifest file '{0}' should exist".format(manifest_file))
