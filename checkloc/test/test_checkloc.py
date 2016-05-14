@@ -217,8 +217,10 @@ class TestChecklocModule(unittest.TestCase):
         errors = ch.validate_loc_files()
         self.assertTrue(errors)
 
-
-if __name__ == '__main__':
+def main():
+    """
+    Parse arguments and run the tests.
+    """
     parser = argparse.ArgumentParser(description=__doc__)
     verbosity_group = parser.add_mutually_exclusive_group()
     verbosity_group.add_argument(
@@ -245,3 +247,6 @@ if __name__ == '__main__':
     # this ensures we can always detect correct warning behaviour.
     warnings.simplefilter('always', UserWarning)
     unittest.main()
+
+if __name__ == '__main__':
+    main()
