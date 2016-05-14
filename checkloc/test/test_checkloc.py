@@ -183,7 +183,7 @@ class TestChecklocModule(unittest.TestCase):
             "Test setup: manifest file '{0}' should exist".format(manifest_file))
         self.assertFalse(
             os.path.isdir(manifest_file),
-            "Test setup: file '{0}' is not a directory".format(manifest_file))
+            "Test setup: file '{0}' is a directory".format(manifest_file))
         checker = checkloc.CheckLoc(manifest_dir=manifest_file)
         errors = checker.validate_loc_files()
         self.assertFalse(errors)
@@ -192,10 +192,10 @@ class TestChecklocModule(unittest.TestCase):
         file_name = os.path.join(self.test_data_dir, 'test_file.txt')
         self.assertTrue(
             os.path.exists(file_name),
-            "Test setup: file {0} exists".format(file_name))
+            "Test setup: file {0} should exist".format(file_name))
         self.assertFalse(
             os.path.isdir(file_name),
-            "Test setup: file {0} is not a directory".format(file_name))
+            "Test setup: file {0} is a directory".format(file_name))
         checker = checkloc.CheckLoc(locales_only=True, manifest_dir=file_name)
         errors = checker.validate_loc_files()
         self.assertTrue(errors)
@@ -207,7 +207,7 @@ class TestChecklocModule(unittest.TestCase):
             "Test setup: directory {0} should exist".format(empty_dir))
         self.assertTrue(
             os.path.isdir(empty_dir),
-            "Test setup: {0} is a directory".format(empty_dir))
+            "Test setup: {0} is not a directory".format(empty_dir))
         checker = checkloc.CheckLoc(locales_only=True, manifest_dir=empty_dir)
         errors = checker.validate_loc_files()
         self.assertTrue(errors)
@@ -219,7 +219,7 @@ class TestChecklocModule(unittest.TestCase):
             "Test setup: directory {0} should exist".format(base_dir))
         self.assertTrue(
             os.path.isdir(base_dir),
-            "Test setup: {0} is a directory".format(base_dir))
+            "Test setup: {0} is not a directory".format(base_dir))
         checker = checkloc.CheckLoc(locales_only=True, manifest_dir=base_dir)
         errors = checker.validate_loc_files()
         self.assertTrue(errors)
@@ -234,7 +234,7 @@ class TestChecklocModule(unittest.TestCase):
             "Test setup: directory {0} should exist".format(base_dir))
         self.assertTrue(
             os.path.isdir(base_dir),
-            "Test setup: {0} is a directory".format(base_dir))
+            "Test setup: {0} is not a directory".format(base_dir))
         checker = checkloc.CheckLoc(manifest_dir=base_dir)
         errors = checker.validate_loc_files()
         self.assertTrue(errors)
