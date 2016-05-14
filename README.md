@@ -20,9 +20,13 @@ Checkloc is a localization [linter](https://en.wikipedia.org/wiki/Lint_%28softwa
 
 ## Usage
 
-```>python checkloc/checkloc.py path/to/your/extension```
+Point the script at the directory that contains your extension's ```chrome.manifest``` file:
 
-Point the script at the directory that contains your extension's ```chrome.manifest``` file.
+```>python checkloc/checkloc.py path/to/your/extension/chrome/manifest/dir```
+
+or
+
+```>python checkloc/checkloc.py path/to/your/extension/chrome/manifest/dir/chrome.manifest```
 
 Or run ```>python checkloc/checkloc.py --help```
 
