@@ -107,7 +107,7 @@ class LocalizationLanguage(object):
         self.loc_dir = localization_base_dir
         self.name = language
         self._log_warning = log_warning
-        self._log_error = log_error
+        self._parent_log_error = log_error
 
         self.parsing_errors = False
 
@@ -118,7 +118,7 @@ class LocalizationLanguage(object):
         # this function wraps setting the parsing error flag
         # to keep all error code in one place
         self.parsing_errors = True
-        self._log_error(msg, self.name)
+        self._parent_log_error(msg, self.name)
 
 
     def _extract_first_dtd_parse_error_info(self, err):
