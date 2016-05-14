@@ -173,7 +173,22 @@ class TestChecklocModule(unittest.TestCase):
         errors = checker.validate_loc_files()
         self.assertTrue(errors)
 
-    def test_passing_non_directory_raises_an_error(self):
+    def test_passing_manifest_file_rather_than_manifest_directory_succeeds(self):
+        manifest_file = os.path.join(
+                self.test_data_dir,
+                'manifest_valid_data',
+                'chrome.manifest')
+        self.assertTrue(
+            os.path.exists(manifest_file),
+            "Test setup: manifest file '{0}' should exist".format(manifest_file))
+        self.assertFalse(
+            os.path.isdir(manifest_file),
+            "Test setup: file '{0}' is not a directory".format(manifest_file))
+        checker = checkloc.CheckLoc(manifest_dir=manifest_file)
+        errors = checker.validate_loc_files()
+        self.assertFalse(errors)
+
+    def test_passing_non_manifest_file_raises_an_error(self):
         file_name = os.path.join(self.test_data_dir, 'test_file.txt')
         self.assertTrue(
             os.path.exists(file_name),

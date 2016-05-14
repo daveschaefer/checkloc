@@ -726,12 +726,11 @@ class CheckLoc(object):
         logging.info("Loc directory %s exists.", manifest_dir)
 
         if not os.path.isdir(manifest_dir):
-            self._log_error("{0} is not a directory!".format(manifest_dir))
-            return True
-        logging.info("%s is a directory.", manifest_dir)
+            # if the user invokes with the exact path to the chrome.manifest file
+            # still attempt to run using the given directory
+            manifest_dir = os.path.dirname(manifest_dir)
 
         ms = ManifestSet(manifest_dir, self._log_error, self._log_warning)
-
 
         loc_dirs = []
         if self.locales_only:
