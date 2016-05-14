@@ -96,24 +96,24 @@ class IChecklocDataTester(object):
                 "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning..."
                 .format(i, full_path))
             # capture all warnings so we can verify that they happen
-            with warnings.catch_warnings(record=True) as w:
+            with warnings.catch_warnings(record=True) as warn_list:
                 checker = checkloc.CheckLoc(manifest_dir=full_path, locales_only=self.LOCALES_ONLY)
                 errors = checker.validate_loc_files()
                 self.tester.assertFalse(
                     errors,
                     "Warning test '{0}' should not generate any errors.".format(full_path))
                 self.tester.assertTrue(
-                    len(w) > 0,
+                    len(warn_list) > 0,
                     "Warning test '{0}' should generate at least one warning.".format(full_path))
                 self.tester.assertTrue(
-                    issubclass(w[-1].category, Warning),
+                    issubclass(warn_list[-1].category, Warning),
                     "Warning test '{0}' should generate a warning of type Warning."
                     .format(full_path))
                 # with catch_warnings() the behaviour changes so warnings
                 # are no longer printed to stdout.
                 # print them to stdout so users can still see what is going on.
-                for warning in w:
-                    logging.warning(warning.message)
+                for warn in warn_list:
+                    logging.warning(warn.message)
         else:
             raise Exception(
                 "validate() called with '{0}' - this is not a valid type of data!"
