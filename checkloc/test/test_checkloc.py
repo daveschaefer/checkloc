@@ -58,7 +58,8 @@ class TestChecklocModule(unittest.TestCase):
         """
         Set up tests to run.
         """
-        self.test_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+        self.test_data_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
             TEST_DATA_SUBDIR)
 
     def test_valid_data_is_parsed_and_invalid_data_is_caught(self):
