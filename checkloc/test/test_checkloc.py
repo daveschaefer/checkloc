@@ -158,11 +158,17 @@ class TestChecklocModule(unittest.TestCase):
         for directory in dirs:
             target_dir = os.path.join(self.test_data_dir, directory)
             if locale_tester.has_test_data_in_dir(target_dir):
+                i += 1 # only increment if we actually tried to validate
                 locale_tester.validate(target_dir, i)
             elif manifest_tester.has_test_data_in_dir(target_dir):
+                i += 1
                 manifest_tester.validate(target_dir, i)
             # ignore other directories
-            i += 1
+
+        self.assertTrue(
+            i > 1,
+            "No validation tests were run! Is there localization test data in '{0}'?"
+            .format(self.test_data_dir))
 
     def test_nonexistent_directories_raise_an_error(self):
         non_existent_dir = os.path.join(self.test_data_dir, 'null_empty')
