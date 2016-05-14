@@ -17,6 +17,8 @@
 Run unit tests for the checkloc module.
 """
 
+from __future__ import print_function
+
 import argparse
 import logging
 import os
@@ -69,19 +71,19 @@ class TestChecklocModule(unittest.TestCase):
             target_dir = os.path.join(self.test_data_dir, d)
 
             if d.startswith(VALID_DATA_NAME):
-                print "-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d)
+                print("-------\n[{0}.] Checking data in '{1}'; should be valid...".format(i, d))
                 ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
                 errors = ch.validate_loc_files()
                 self.assertFalse(errors)
                 i += 1
             elif d.startswith(INVALID_DATA_NAME):
-                print "-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d)
+                print("-------\n[{0}.] Checking invalid data in '{1}'; should find an error...".format(i, d))
                 ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
                 errors = ch.validate_loc_files()
                 self.assertTrue(errors)
                 i += 1
             elif d.startswith(WARNING_NAME):
-                print "-------\n[{0}.] Checking warning data in '{1}'; should generate a warning...".format(i, d)
+                print("-------\n[{0}.] Checking warning data in '{1}'; should generate a warning...".format(i, d))
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
                     ch = checkloc.CheckLoc(locales_only=True, manifest_dir=target_dir)
@@ -102,7 +104,7 @@ class TestChecklocModule(unittest.TestCase):
                         logging.warning(warning.message)
                 i += 1
             elif d.startswith(MANIFEST_VALID_NAME):
-                print "-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d)
+                print("-------\n[{0}.] Checking manifest data in '{1}'; should be valid...".format(i, d))
                 ch = checkloc.CheckLoc(manifest_dir=target_dir)
                 errors = ch.validate_loc_files()
                 self.assertFalse(
@@ -110,7 +112,7 @@ class TestChecklocModule(unittest.TestCase):
                     "Valid manifest test '{0}' should not generate any errors.".format(d))
                 i += 1
             elif d.startswith(MANIFEST_INVALID_NAME):
-                print "-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d)
+                print("-------\n[{0}.] Checking invalid manifest data in '{1}'; should find an error...".format(i, d))
                 ch = checkloc.CheckLoc(manifest_dir=target_dir)
                 errors = ch.validate_loc_files()
                 self.assertTrue(
@@ -118,7 +120,7 @@ class TestChecklocModule(unittest.TestCase):
                     "Invalid manifest test '{0}' should generate at least one error.".format(d))
                 i += 1
             elif d.startswith(MANIFEST_WARNING_NAME):
-                print "-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning...".format(i, d)
+                print("-------\n[{0}.] Checking manifest data in '{1}'; should generate a warning...".format(i, d))
                 # capture all warnings so we can verify that they happen
                 with warnings.catch_warnings(record=True) as w:
                     ch = checkloc.CheckLoc(manifest_dir=target_dir)
