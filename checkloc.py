@@ -155,7 +155,7 @@ class LocalizationLanguage(object):
         for (_, _, files) in os.walk(self.loc_dir):
             loc_files.extend(files)
 
-        logging.info("Checking files in {0}".format(self.loc_dir))
+        logging.info("Checking files in %s", self.loc_dir)
         for file_name in loc_files:
             file_path = os.path.normpath(os.path.join(self.loc_dir, file_name))
             file_name = file_name.replace(self.LSEP, '')
@@ -253,7 +253,7 @@ class LocalizationLanguage(object):
             for line in data:
                 if not line.strip():
                     continue # skip blank lines
-                logging.info(".prop line: '{0}'".format(line))
+                logging.info(".prop line: '%s'", line)
                 numeric_subs_list = [] # list of numbered string substitutions, like %1$S.
                 regular_subs = 0
                 match = self.PROP_LINE.match(line)
@@ -293,8 +293,7 @@ class LocalizationLanguage(object):
                                 if pmatch.group(1):
                                     numeric_subs_list.append(int(pmatch.group(1).replace('$', '')))
                                     logging.info(
-                                        "String substitution found. {0}"
-                                        .format(numeric_subs_list))
+                                        "String substitution found. %s", numeric_subs_list)
                                     x += len(pmatch.group(1))
                                 else:
                                     regular_subs += 1
@@ -725,12 +724,12 @@ class CheckLoc(object):
         if not os.path.exists(manifest_dir):
             self._log_error("The localization directory {0} does not exist!".format(manifest_dir))
             return True
-        logging.info("Loc directory {0} exists.".format(manifest_dir))
+        logging.info("Loc directory %s exists.", manifest_dir)
 
         if not os.path.isdir(manifest_dir):
             self._log_error("{0} is not a directory!".format(manifest_dir))
             return True
-        logging.info("{0} is a directory.".format(manifest_dir))
+        logging.info("%s is a directory.", manifest_dir)
 
         ms = ManifestSet(manifest_dir, self._log_error, self._log_warning)
 
