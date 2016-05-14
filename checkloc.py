@@ -162,9 +162,9 @@ class LocalizationLanguage(object):
             # check each file for the Byte Order Marker;
             # according to the MDN spec, localization files should *not* contain BOM
             # https://developer.mozilla.org/en/XUL_Tutorial/Localization
-            bytes = min(32, os.path.getsize(file_path))
+            bytes_to_read = min(32, os.path.getsize(file_path))
             with open(file_path, 'rb') as rawfile:
-                if rawfile.read(bytes).startswith(codecs.BOM_UTF8):
+                if rawfile.read(bytes_to_read).startswith(codecs.BOM_UTF8):
                     self._log_error(
                         "File '{0}' contains Byte Order Marker; "
                         "localization files should not contain BOM."
