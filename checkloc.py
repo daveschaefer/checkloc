@@ -827,8 +827,10 @@ class CheckLoc(object):
         self._log_normal("Done!")
         return self.any_errors
 
-
-if __name__ == '__main__':
+def main():
+    """
+    Parse args and run the program.
+    """
     args = CheckLoc.parse_args()
     checkloc = CheckLoc(args.group_by_language, args.json, args.locales_only, args.manifest_dir)
     errors = checkloc.validate_loc_files()
@@ -845,3 +847,6 @@ if __name__ == '__main__':
         sys.exit(1)
     else:
         sys.exit(0)
+
+if __name__ == '__main__':
+    main()
