@@ -808,7 +808,8 @@ class CheckLoc(object):
                         "String substitution for key '{0}' in '{1}' "
                         "is not the same as baseline '{2}'. "
                         "Substitution count and type must match.\n{1}:{3}\n{2}:{4}"
-                        .format(key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]), lang)
+                        .format(key, loc.name, baseline.name, loc.subs[key], baseline.subs[key]),
+                        lang)
 
             for key in baseline.subs:
                 if key not in loc.subs:
@@ -820,7 +821,8 @@ class CheckLoc(object):
                         "String substitution for key '{0}' in baseline '{1}' "
                         "is not the same as '{2}'. "
                         "Substitution count and type must match.\n{1}:{4}\n{2}:{3}"
-                        .format(key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]), lang)
+                        .format(key, baseline.name, loc.name, loc.subs[key], baseline.subs[key]),
+                        lang)
 
         self._log_normal("Done!")
         return self.any_errors
