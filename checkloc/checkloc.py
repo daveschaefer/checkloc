@@ -37,7 +37,7 @@ import manifest_set
 # MAJOR version when you make backwards-incompatible changes,
 # MINOR version when you add functionality in a backwards-compatible manner
 # PATCH version when you make backwards-compatible bug fixes.
-VERSION = "2.1.3"
+VERSION = "2.1.4"
 
 class CheckLoc(object):
     """
