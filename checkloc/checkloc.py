@@ -560,85 +560,6 @@ class CheckLoc(object):
     # the en-US translation will have all files and strings created. Use it as the base.
     BASE_LOC = 'en-US'
 
-    @staticmethod
-    def cb_format_warning(message, category, filename, lineno, line=None):
-        """
-        Format a warning message and return it as a string.
-
-        Overrides the warnings module's built-in formatwarning() function
-        so we can format warnings using this module's log formatting.
-        """
-        return message
-
-    @staticmethod
-    def _get_parser():
-        """
-        Return a CheckLoc argument parser
-        """
-        parser = argparse.ArgumentParser(description=__doc__)
-        parser.add_argument(
-            'manifest_dir',
-            help="Directory where chrome.manifest file is located.")
-
-        verbosity_group = parser.add_mutually_exclusive_group()
-        verbosity_group.add_argument(
-            '--verbose', '-v',
-            default=False,
-            action='store_true',
-            help="Verbose mode. Print more info about files and tests.")
-        verbosity_group.add_argument(
-            '--quiet', '-q',
-            default=False,
-            action='store_true',
-            help="Quiet mode. Don't print much, not even error info.")
-
-        parser.add_argument(
-            '--locales-only', '-l',
-            default=False,
-            action='store_true',
-            help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
-            "Instead, point the script directly to your locale folder: "
-            "it will treat all subfolders as locales and parse them individually. "
-            "Mainly intended to allow easier unit-testing of checkloc itself; "
-            "you should usually *NOT* use this flag.")
-
-        parser.add_argument(
-            '--group-by-language',
-            default=False,
-            action='store_true',
-            help="Save output until the end and group messages by language, "
-            "rather than as they are encountered.")
-
-        parser.add_argument(
-            '--json',
-            default=False,
-            action='store_true',
-            help="Output messages as JSON rather than standard messages. "
-            "Enabling this implies also enabling --group-by-language.")
-
-        return parser
-
-    @staticmethod
-    def parse_args():
-        """
-        Parse the args and set everything up.
-        """
-        args = CheckLoc._get_parser().parse_args()
-
-        loglevel = logging.WARNING
-        if args.verbose:
-            loglevel = logging.INFO
-        elif args.quiet:
-            loglevel = logging.CRITICAL
-
-        logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
-        # send warning messages through our logging system
-        # with the desired formatting
-        logging.captureWarnings(True)
-        warnings.formatwarning = CheckLoc.cb_format_warning
-
-        return args
-
     def __init__(self, group_by_language=False, output_json=False, locales_only=False,
                  manifest_dir=None):
         self.any_errors = False
@@ -827,11 +748,87 @@ class CheckLoc(object):
         self._log_normal("Done!")
         return self.any_errors
 
+def cb_format_warning(message, category, filename, lineno, line=None):
+    """
+    Format a warning message and return it as a string.
+
+    Overrides the warnings module's built-in formatwarning() function
+    so we can format warnings using this module's log formatting.
+    """
+    return message
+
+def _get_parser():
+    """
+    Return a CheckLoc argument parser
+    """
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        'manifest_dir',
+        help="Directory where chrome.manifest file is located.")
+
+    verbosity_group = parser.add_mutually_exclusive_group()
+    verbosity_group.add_argument(
+        '--verbose', '-v',
+        default=False,
+        action='store_true',
+        help="Verbose mode. Print more info about files and tests.")
+    verbosity_group.add_argument(
+        '--quiet', '-q',
+        default=False,
+        action='store_true',
+        help="Quiet mode. Don't print much, not even error info.")
+
+    parser.add_argument(
+        '--locales-only', '-l',
+        default=False,
+        action='store_true',
+        help="Do not attempt to parse or validate chrome.manifest or install.rdf. "
+        "Instead, point the script directly to your locale folder: "
+        "it will treat all subfolders as locales and parse them individually. "
+        "Mainly intended to allow easier unit-testing of checkloc itself; "
+        "you should usually *NOT* use this flag.")
+
+    parser.add_argument(
+        '--group-by-language',
+        default=False,
+        action='store_true',
+        help="Save output until the end and group messages by language, "
+        "rather than as they are encountered.")
+
+    parser.add_argument(
+        '--json',
+        default=False,
+        action='store_true',
+        help="Output messages as JSON rather than standard messages. "
+        "Enabling this implies also enabling --group-by-language.")
+
+    return parser
+
+def _parse_args():
+    """
+    Parse the args and set everything up.
+    """
+    args = _get_parser().parse_args()
+
+    loglevel = logging.WARNING
+    if args.verbose:
+        loglevel = logging.INFO
+    elif args.quiet:
+        loglevel = logging.CRITICAL
+
+    logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
+    # send warning messages through our logging system
+    # with the desired formatting
+    logging.captureWarnings(True)
+    warnings.formatwarning = cb_format_warning
+
+    return args
+
 def main():
     """
     Parse args and run the program.
     """
-    args = CheckLoc.parse_args()
+    args = _parse_args()
     checkloc = CheckLoc(args.group_by_language, args.json, args.locales_only, args.manifest_dir)
     errors = checkloc.validate_loc_files()
 
