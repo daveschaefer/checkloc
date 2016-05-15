@@ -30,7 +30,6 @@ import sys
 import warnings
 
 import loc_language
-import localecodes
 import manifest_set
 
 # Attempt to version meaningfully, following semver.org:
