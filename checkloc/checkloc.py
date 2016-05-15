@@ -561,7 +561,7 @@ class CheckLoc(object):
     BASE_LOC = 'en-US'
 
     @staticmethod
-    def format_warning(message, category, filename, lineno, line=None):
+    def cb_format_warning(message, category, filename, lineno, line=None):
         """
         Format a warning message and return it as a string.
 
@@ -635,7 +635,7 @@ class CheckLoc(object):
         # send warning messages through our logging system
         # with the desired formatting
         logging.captureWarnings(True)
-        warnings.formatwarning = CheckLoc.format_warning
+        warnings.formatwarning = CheckLoc.cb_format_warning
 
         return args
 
