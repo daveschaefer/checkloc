@@ -12,6 +12,21 @@ We attempt to use meaningful version numbers, following semver.org:
 	PATCH version when you make backwards-compatible bug fixes.
 
 
+2.1.4
+-----
+Internal cleanup release
+
+i Refactor classes: remove global state; use proper encapsulation with arguments
+i Move checkloc code to its own class
+i Move classes to their own files
+i Refactor tests to use classes and interface
+i Fix more bugs with pylint: fix long line indentation, clean up variable names.
+i Arrange files into proper package layout
+* Fix error message and exit code when importing lxml module
+* Provide better UI: continue to run if passed exact path to chrome.manifest file rather than the directory name
+* Copyedit readme
+
+
 2.1.3
 -----
 * Fix many bugs with pylint
