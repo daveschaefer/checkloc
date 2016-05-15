@@ -35,10 +35,10 @@ import warnings
 try:
     from lxml import etree
 except ImportError:
-    warnings.warn(
-        "python lxml library not found; localization tests cannot be run. "
+    print(
+        "ERROR: python lxml library not found; localization tests cannot be run. "
         "Please install the python 'lxml' library to run localization tests.")
-    sys.exit(0)
+    sys.exit(1)
 
 import localecodes
 
