@@ -42,8 +42,8 @@ class ManifestSet(object):
 
     # start of string used to register locale packages - see
     # https://developer.mozilla.org/en-US/docs/Chrome_Registration#locale
-    MANIFEST_LOCALE_START = 'locale'
-    MANIFEST_LOCALE_LINE = re.compile(r'^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
+    _MANIFEST_LOCALE_START = 'locale'
+    _MANIFEST_LOCALE_LINE = re.compile(r'^\s*locale\s+\S+\s+(\S+)\s+(\S+)')
 
     def __init__(self, manifest_dir, log_error, log_warning):
         """
@@ -100,8 +100,8 @@ class ManifestSet(object):
             lines = m.readlines()
             i = 1 # save the line number to help users troubleshoot any problems
             for line in lines:
-                if line.startswith(self.MANIFEST_LOCALE_START):
-                    match = self.MANIFEST_LOCALE_LINE.match(line)
+                if line.startswith(self._MANIFEST_LOCALE_START):
+                    match = self._MANIFEST_LOCALE_LINE.match(line)
                     if match:
                         locale = match.groups(1)[0]
                         locale_subdir = match.group(2)

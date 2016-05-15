@@ -47,7 +47,7 @@ class CheckLoc(object):
     """
 
     # the en-US translation will have all files and strings created. Use it as the base.
-    BASE_LOC = 'en-US'
+    _BASE_LOC = 'en-US'
 
     def __init__(self, group_by_language=False, output_json=False, locales_only=False,
                  manifest_dir=None):
@@ -164,14 +164,14 @@ class CheckLoc(object):
             return True
         self._log_normal("Found {0} languages: {1}.".format(len(langs), langs.keys()))
 
-        if self.BASE_LOC not in langs:
+        if self._BASE_LOC not in langs:
             self._log_error("Base language folder '{0}' was not found in {1}".format(\
-                self.BASE_LOC, loc_dirs))
+                self._BASE_LOC, loc_dirs))
             return True
 
 
         baseline = loc_language.LocalizationLanguage(
-            langs[self.BASE_LOC], self.BASE_LOC, self._log_warning, self._log_error)
+            langs[self._BASE_LOC], self._BASE_LOC, self._log_warning, self._log_error)
         parse_errors = baseline.get_loc_keys()
         self.any_errors = self.any_errors or parse_errors
 
@@ -186,7 +186,7 @@ class CheckLoc(object):
             "{0} keys found in baseline '{1}'."
             .format(len(baseline.keys), baseline.name))
 
-        del langs[self.BASE_LOC] # don't test the baseline localization against itself
+        del langs[self._BASE_LOC] # don't test the baseline localization against itself
 
         for lang in langs:
             loc = loc_language.LocalizationLanguage(
@@ -237,7 +237,7 @@ class CheckLoc(object):
         self._log_normal("Done!")
         return self.any_errors
 
-def cb_format_warning(message, category, filename, lineno, line=None):
+def _cb_format_warning(message, category, filename, lineno, line=None):
     """
     Format a warning message and return it as a string.
 
@@ -309,7 +309,7 @@ def _parse_args():
     # send warning messages through our logging system
     # with the desired formatting
     logging.captureWarnings(True)
-    warnings.formatwarning = cb_format_warning
+    warnings.formatwarning = _cb_format_warning
 
     return args
 

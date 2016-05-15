@@ -48,7 +48,7 @@ class LocalizationLanguage(object):
     # a legal filename character on most systems (including windows, linux, and osx).
     # This makes it easier to ensure we won't encounter it in file names
     # or have difficulty printing error info.
-    LSEP = '/'
+    _LSEP = '/'
 
     # .properties files look like:
     #   # comments are ignored
@@ -56,17 +56,17 @@ class LocalizationLanguage(object):
     #   name=string
     #   name:string
     # Assumptions: both comments and entries exist only on a single line.
-    PROP_COMMENT = re.compile(r'^\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.MULTILINE)
-    PROP_SEP = re.compile(r'[\n\r\f]')
+    _PROP_COMMENT = re.compile(r'^\s*[#!]+[^\n\r\f]*[\n\r\f]+', re.MULTILINE)
+    _PROP_SEP = re.compile(r'[\n\r\f]')
     # almost any character is a valid .properties key
     # except : and = , which note the transition to a value,
     # and spaces.
     # Because we parse and remove PROP_COMMENTs first, that regex will catch any
     # '#' or '!' characters that are found as the first non-whitespace part of a line.
     # This means we can allow # and ! inside this regex and it's not as complex.
-    PROP_LINE = re.compile(r'^\s*([A-Za-z0-9_.\-+\\{}\[\]!@#$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
+    _PROP_LINE = re.compile(r'^\s*([A-Za-z0-9_.\-+\\{}\[\]!@#$%^&*()/<>,?;\'"`~|]+)\s*[=:]\s*([^\n\r\f]*)')
 
-    DTD_PARSE_ERROR = re.compile(r'([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
+    _DTD_PARSE_ERROR = re.compile(r'([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):([^:]*):(.*)', re.DOTALL)
 
     # Firefox does not allow more than ten string substitution parameters, for performance reasons.
     # For details see nsStringBundle.cpp
@@ -77,7 +77,7 @@ class LocalizationLanguage(object):
     # for unprovided substitutions greater than ten.
     # However, we should still flag this as an error,
     # as it probably won't do what the author intended.
-    MOZILLA_MAX_PROPERTIES_STRING_SUBS = 10
+    _MOZILLA_MAX_PROPERTIES_STRING_SUBS = 10
 
     def __init__(self, localization_base_dir, language, log_warning, log_error):
         """
@@ -116,7 +116,7 @@ class LocalizationLanguage(object):
         # error_log lines are formatted like:
         # <string>:10:17:FATAL:PARSER:ERR_VALUE_REQUIRED: Entity value required
         line = str(err.error_log[0]).strip()
-        match = re.match(self.DTD_PARSE_ERROR, line)
+        match = re.match(self._DTD_PARSE_ERROR, line)
         if match:
             (string, line, column, errlevel, place, errname, message) = match.groups()
             return [string, line, column, errlevel, place, errname, message.strip()]
@@ -141,7 +141,7 @@ class LocalizationLanguage(object):
         logging.info("Checking files in %s", self.loc_dir)
         for file_name in loc_files:
             file_path = os.path.normpath(os.path.join(self.loc_dir, file_name))
-            file_name = file_name.replace(self.LSEP, '')
+            file_name = file_name.replace(self._LSEP, '')
 
             # check each file for the Byte Order Marker;
             # according to the MDN spec, localization files should *not* contain BOM
@@ -161,7 +161,7 @@ class LocalizationLanguage(object):
                         for entity in dtd.entities():
                             # note: lxml actually removes duplicate entities when parsing;
                             # it always takes the first entry.
-                            key = file_name + self.LSEP + entity.name
+                            key = file_name + self._LSEP + entity.name
                             if key in self.keys:
                                 self._log_error(
                                     "Duplicate dtd key '{0}' found in {1}"
@@ -221,7 +221,7 @@ class LocalizationLanguage(object):
 
         https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XUL/Tutorial/Property_Files
         """
-        file_name = os.path.basename(file_path).replace(self.LSEP, '')
+        file_name = os.path.basename(file_path).replace(self._LSEP, '')
         lang = os.path.basename(os.path.dirname(file_path))
 
         with open(file_path, 'r') as openfile:
@@ -231,17 +231,17 @@ class LocalizationLanguage(object):
                 self._log_warning("{0} does not contain any lines".format(file_path), self.name)
                 return
 
-            data = re.sub(self.PROP_COMMENT, '', data)
-            data = re.split(self.PROP_SEP, data)
+            data = re.sub(self._PROP_COMMENT, '', data)
+            data = re.split(self._PROP_SEP, data)
             for line in data:
                 if not line.strip():
                     continue # skip blank lines
                 logging.info(".prop line: '%s'", line)
                 numeric_subs_list = [] # list of numbered string substitutions, like %1$S.
                 regular_subs = 0
-                match = self.PROP_LINE.match(line)
+                match = self._PROP_LINE.match(line)
                 if match:
-                    key = file_name + self.LSEP + match.group(1)
+                    key = file_name + self._LSEP + match.group(1)
                     value = match.group(2)
                     if key in self.keys:
                         self._log_error(
@@ -295,15 +295,15 @@ class LocalizationLanguage(object):
                             # different languages can use substitutions in different orders
                             # sort to ensure the count and type are the same
                             numeric_subs_list.sort()
-                            if (numeric_subs_list and numeric_subs_list[-1] > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS) or \
-                                regular_subs > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
+                            if (numeric_subs_list and numeric_subs_list[-1] > self._MOZILLA_MAX_PROPERTIES_STRING_SUBS) or \
+                                regular_subs > self._MOZILLA_MAX_PROPERTIES_STRING_SUBS or \
                                 (numeric_subs_list and \
-                                    ((numeric_subs_list[-1] + regular_subs) > self.MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
+                                    ((numeric_subs_list[-1] + regular_subs) > self._MOZILLA_MAX_PROPERTIES_STRING_SUBS)):
                                 self._log_error(
                                     "More than {0} string substitutions found for key '{1}' in '{2}'. "
                                     "Mozilla does not allow this for performance reasons. "
                                     "See https://mxr.mozilla.org/mozilla-central/source/intl/strres/nsStringBundle.cpp "
-                                    "".format(self.MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
+                                    "".format(self._MOZILLA_MAX_PROPERTIES_STRING_SUBS, key, lang))
 
                             self.subs[key] = ''.join(str(numeric_subs_list))
 
