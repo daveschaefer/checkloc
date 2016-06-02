@@ -1,0 +1,16 @@
+[BASIC]
+
+# longer method names are fine:
+# it is useful to name a test method to describe the behaviour.
+# e.g.:
+#    test_that_x_causes_y_behaviour
+#    test_that_behaviour_z_is_caught
+method-rgx=[a-z_][a-z0-9_]{2,100}$
+method-name-hint=[a-z_][a-z0-9_]{2,100}$
+
+# don't force test methods to have a docstring;
+# the method name should fully document what it does
+no-docstring-rgx=(__.*__|test_.*)
+
+class-attribute-rgx=([A-Za-z_][A-Za-z0-9_]{2,40}|(__.*__))$
+class-attribute-name-hint=([A-Za-z_][A-Za-z0-9_]{2,40}|(__.*__))$
